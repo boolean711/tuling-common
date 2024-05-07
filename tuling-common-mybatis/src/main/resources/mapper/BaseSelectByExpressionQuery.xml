@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Base">
+
+    <sql id="selectByExpressionQuery" >
+
+        <where>
+            <foreach collection="query.entrySet()" item="entry" separator="AND">
+                <!-- 转换驼峰命名到下划线命名 -->
+                <bind name="columnName" value="@com.gty.tulingUtils.MybatisUtils@camelToUnderscore(entry.key)"/>
+                <choose>
+                    <when test="entry.value.containsKey('EQ')">
+                        ${columnName} = #{entry.value['EQ']}
+                    </when>
+                    <when test="entry.value.containsKey('LIKE')">
+                        ${columnName} LIKE CONCAT('%', #{entry.value['LIKE']}, '%')
+                    </when>
+                    <when test="entry.value.containsKey('GE')">
+                        ${columnName} &gt;= #{entry.value['GE']}
+                    </when>
+                    <when test="entry.value.containsKey('LE')">
+                        ${columnName} &lt;= #{entry.value['LE']}
+                    </when>
+                    <when test="entry.value.containsKey('IN')">
+                        ${columnName} IN
+                        <foreach collection="entry.value['IN'].split(',')" item="val" open="(" separator="," close=")">
+                            #{val}
+                        </foreach>
+                    </when>
+                    <when test="entry.value.containsKey('BETWEEN')">
+                        ${columnName} BETWEEN #{entry.value['BETWEEN'].split(',')[0]} AND #{entry.value['BETWEEN'].split(',')[1]}
+                    </when>
+                    <!-- 其他的比较表达式 -->
+                </choose>
+            </foreach>
+        </where>
+        <if test="sort != null and !sort.isEmpty()">
+            ORDER BY
+            <foreach collection="sort.values()" item="order" separator=",">
+                <!-- 转换驼峰命名到下划线命名 -->
+                <bind name="sortedColumn" value="@com.gty.tulingUtils.MybatisUtils@camelToUnderscore(order.field)"/>
+                ${sortedColumn} ${order.direction}
+            </foreach>
+        </if>
+    </sql>
+
+</mapper>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <groupId>com.tuling</groupId>
+
+    <artifactId>tuling-common</artifactId>
+    <version>1.0.0</version>
+    <modelVersion>4.0.0</modelVersion>
+    <packaging>pom</packaging>
+
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <hutool.version>5.8.25</hutool.version>
+        <mybatis-plus-version>3.5.3.1</mybatis-plus-version>
+        <druid-version>1.2.16</druid-version>
+        <spring-boot-version>2.7.9</spring-boot-version>
+        <sa-token.version>1.37.0</sa-token.version>
+        <mysql-version>8.0.27</mysql-version>
+        <revision>1.0.0</revision>
+        <redisson.version>3.24.3</redisson.version>
+        <easy-excel-version>3.1.1</easy-excel-version>
+        <tencent-cloud-api-version>3.1.1000</tencent-cloud-api-version>
+        <lombok-version>1.18.26</lombok-version>
+    </properties>
+    <modules>
+        <module>tuling-common-utils</module>
+        <module>tuling-common-bom</module>
+        <module>tuling-common-mybatis</module>
+        <module>tuling-common-core</module>
+        <module>tuling-common-web</module>
+        <module>tuling-common-redis</module>
+        <module>tuling-common-excel</module>
+        <module>tuling-common-sms</module>
+        <module>tuling-common-satoken</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- springboot -->
+            <!-- SpringBoot的依赖配置-->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot-version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.tuling</groupId>
+                <artifactId>tuling-common-bom</artifactId>
+                <version>${revision}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>easyexcel</artifactId>
+                <version>${easy-excel-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql-version}</version>
+
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis-plus-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.dev33</groupId>
+                <artifactId>sa-token-spring-boot-starter</artifactId>
+                <version>${sa-token.version}</version>
+            </dependency>
+            <!-- Sa-Token整合Redis (使用jackson序列化方式) -->
+            <dependency>
+                <groupId>cn.dev33</groupId>
+                <artifactId>sa-token-redis-jackson</artifactId>
+                <version>${sa-token.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.dev33</groupId>
+                <artifactId>sa-token-jwt</artifactId>
+                <version>${sa-token.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.tencentcloudapi</groupId>
+                <artifactId>tencentcloud-sdk-java</artifactId>
+                <version>${tencent-cloud-api-version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+</project>
