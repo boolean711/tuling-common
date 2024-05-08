@@ -19,7 +19,7 @@ import java.util.Date;
 public class SpringMvcConfig implements WebMvcConfigurer {
 
 
-    @Autowired
+    @Autowired(required = false)
     private  ISaTokenInterceptorHandler saTokenInterceptorHandler;
 
     @Override
