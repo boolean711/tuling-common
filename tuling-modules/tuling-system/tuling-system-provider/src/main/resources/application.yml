@@ -1,0 +1,4 @@
+tenant:
+  tableName:
+    - sys_role
+    - sys_menu

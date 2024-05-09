@@ -37,6 +37,7 @@
         <module>tuling-common-excel</module>
         <module>tuling-common-sms</module>
         <module>tuling-common-satoken</module>
+        <module>tuling-modules</module>
     </modules>
 
     <dependencyManagement>
