@@ -24,5 +24,7 @@ public interface LoginUserDetails {
     Long getTenantId();
 
 
+    List<Long> getRoleIdList();
+
 
 }

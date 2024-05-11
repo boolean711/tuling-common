@@ -2,9 +2,7 @@ package com.tuling.common.web.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.tuling.common.core.param.BaseEntity;
-import com.tuling.common.core.param.BaseSaveDto;
-import com.tuling.common.core.param.BaseVo;
+import com.tuling.common.core.param.*;
 import com.tuling.common.mybatis.param.ExpressionQueryDto;
 
 
@@ -26,5 +24,6 @@ public interface CrudBaseIService<E extends BaseEntity, VO extends BaseVo, SAVE 
 
     Map<Long, VO> getIdVoMap(Predicate<E> predicate);
 
+    <T extends BaseTreeVo> List<T> buildTree(TreeVoCreator<T> creator);
 
 }

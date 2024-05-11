@@ -4,6 +4,7 @@ package com.tuling.system.domain.vo;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.tuling.common.core.param.BaseEntity;
 import com.tuling.common.core.param.BaseVo;
+import com.tuling.common.core.param.TreeNode;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.List;
 
 @Data
 
-public class SysMenuVo extends BaseVo {
+public class SysMenuVo extends BaseVo implements TreeNode {
 
     private String menuName;
     private Long parentId;
