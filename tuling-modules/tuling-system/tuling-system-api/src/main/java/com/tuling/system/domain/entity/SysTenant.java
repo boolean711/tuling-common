@@ -25,7 +25,7 @@ public class SysTenant extends BaseEntity {
 
 
     private Integer textMessageQty;
-
+    private Long packageId;
 
 
 }

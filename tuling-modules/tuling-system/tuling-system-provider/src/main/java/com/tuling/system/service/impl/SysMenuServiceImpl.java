@@ -40,16 +40,8 @@ public class SysMenuServiceImpl extends CrudBaseServiceImpl<SysMenu, SysMenuVo, 
 
             //如果是超级管理员，返回所有菜单
 
-            List<BaseTreeVo> baseTreeVos = super.buildTree(new TreeMenuVo());
-            // 将 BaseTreeVo 列表转换为 TreeMenuVo 列表
-            List<TreeMenuVo> treeMenuVos = new ArrayList<>();
-            for (BaseTreeVo baseTreeVo : baseTreeVos) {
-                if (baseTreeVo instanceof TreeMenuVo) {
-                    treeMenuVos.add((TreeMenuVo) baseTreeVo);
-                }
-            }
 
-            return treeMenuVos;
+            return super.buildTree(TreeMenuVo.class);
         }
 
         //TODO 如果是租户管理员 返回租户套餐里的菜单

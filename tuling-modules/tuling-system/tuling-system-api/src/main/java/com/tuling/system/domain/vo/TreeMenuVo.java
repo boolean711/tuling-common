@@ -6,19 +6,19 @@ import com.tuling.common.core.param.TreeNode;
 import lombok.Data;
 
 
-
 @Data
 public class TreeMenuVo extends BaseTreeVo {
     private static final long serialVersionUID = 1L;
 
 
-    @Override
-    public BaseTreeVo create(TreeNode node) {
-       return super.create(node);
-    }
+    private String label;
+
+
 
     @Override
-    protected void setCustomField(TreeNode node) {
+    public void setCustomField(TreeNode node) {
+
+        this.label = ((SysMenuVo) node).getMenuName();
 
     }
 }

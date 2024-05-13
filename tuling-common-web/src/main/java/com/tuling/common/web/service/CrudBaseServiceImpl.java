@@ -141,32 +141,29 @@ public abstract class CrudBaseServiceImpl
 
 
     @Override
-    public <T extends BaseTreeVo> List<T> buildTree(TreeVoCreator<T> creator) {
+    public <T extends BaseTreeVo> List<T> buildTree(Class<T > prototypeClass) {
         ExpressionQueryDto<BaseEntity> queryDto = new ExpressionQueryDto<>();
-        queryDto.setNeedCustom(false);
+        queryDto.setNeedPage(false);
 
         IPage<VO> voiPage = this.pageListByExpression((ExpressionQueryDto<E>) queryDto);
         List<VO> records = voiPage.getRecords();
 
+        if (CollectionUtil.isNotEmpty(records) && isTreeNode(records.get(0))) {
+            List<TreeNode> treeNodes = records.stream()
+                    .map(record -> (TreeNode) record)
+                    .collect(Collectors.toList());
 
-        if (CollectionUtil.isNotEmpty(records)) {
-            VO vo = records.get(0);
+            treeNodes = buildTree(treeNodes);
 
-            if (isTreeNode(vo)) {
-                List<? extends TreeNode> treeNodes = BeanListUtils.copyList(records, TreeNode.class);
+            return treeNodes.stream().map(item -> BaseTreeVo.createInstance(prototypeClass, item)).collect(Collectors.toList());
 
-
-                treeNodes = buildTree(treeNodes);
-
-                return treeNodes.stream().map(creator::create).collect(Collectors.toList());
-
-
-            }
         }
+
         return new ArrayList<>(0);
 
 
     }
+
     @SafeVarargs
     protected final LambdaQueryWrapper<E> queryDestinedCol(SFunction<E, ?>... columns) {
         LambdaQueryWrapper<E> lqw = new LambdaQueryWrapper<>();
@@ -228,8 +225,7 @@ public abstract class CrudBaseServiceImpl
     }
 
 
-
-    private List<? extends TreeNode> buildTree(List<? extends TreeNode> voList) {
+    private List<TreeNode> buildTree(List<TreeNode> voList) {
         // 获取第一个Vo对象的实际类型
         Class<? extends TreeNode> voClass = voList.get(0).getClass();
 
@@ -263,8 +259,8 @@ public abstract class CrudBaseServiceImpl
                 // 使用反射获取parentId字段的值
                 parentIdField.setAccessible(true);
                 Long parentId = (Long) parentIdField.get(vo);
-                if (parentId == null) {
-                    // 如果parentId为空，说明是根节点
+                if (parentId == 0L) {
+                    // 如果parentId为0，说明是根节点
                     rootNodes.add(vo);
                 } else {
                     // 根据parentId找到父节点

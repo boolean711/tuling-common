@@ -24,6 +24,6 @@ public interface CrudBaseIService<E extends BaseEntity, VO extends BaseVo, SAVE 
 
     Map<Long, VO> getIdVoMap(Predicate<E> predicate);
 
-    <T extends BaseTreeVo> List<T> buildTree(TreeVoCreator<T> creator);
+   <T extends BaseTreeVo>List<T> buildTree(Class<T> prototypeClass);
 
 }
