@@ -7,11 +7,13 @@ import com.tuling.common.web.service.CrudBaseIService;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
 import com.tuling.system.domain.dto.SysRoleMenuRelSaveDto;
 import com.tuling.system.domain.entity.SysRoleMenuRel;
+import com.tuling.system.domain.entity.SysRolePermissionRel;
 import com.tuling.system.domain.vo.SysRoleMenuRelVo;
 import com.tuling.system.mapper.SysRoleMenuRelMapper;
 import com.tuling.system.service.SysRoleMenuRelService;
 import kotlin.jvm.internal.Lambda;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,5 +39,16 @@ public class SysRoleMenuRelServiceImpl extends CrudBaseServiceImpl<SysRoleMenuRe
             }
         }
         return new ArrayList<>(0);
+    }
+
+    @Override
+    @Transactional
+    public void removeByRoleId(Long roleId) {
+
+        LambdaQueryWrapper<SysRoleMenuRel> lqw = new LambdaQueryWrapper<>();
+
+        lqw.eq(SysRoleMenuRel::getRoleId, roleId);
+
+        this.remove(lqw);
     }
 }

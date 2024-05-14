@@ -9,12 +9,13 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-@TableName("sys_role_menu_rel")
-public class SysRoleMenuRel extends BaseEntity {
+@TableName("sys_user_role_rel")
+public class SysUserRoleRel extends BaseEntity {
 
 
+  private Long userId;
   private Long roleId;
-  private Long menuId;
+
   @TableField(exist = false)
   private Long updateId;
   @TableField(exist = false)

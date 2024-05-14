@@ -12,7 +12,9 @@ import java.util.Date;
 public class SysUser extends BaseEntity {
 
 
-    private String name;
+    private String nickName;
+
+    private String code;
     private String password;
     private String phoneNum;
     private String avatarUrl;
@@ -24,6 +26,9 @@ public class SysUser extends BaseEntity {
 
     private String username;
     private String lastLoginIp;
+
+    private String gender;
+    private String remark;
 
 
 }

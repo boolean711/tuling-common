@@ -14,6 +14,9 @@ public interface SysPermissionService extends CrudBaseIService<SysPermission, Sy
 
 
 
+    SysPermissionVo getPermissionByCode(String code);
+
+
 
 
 

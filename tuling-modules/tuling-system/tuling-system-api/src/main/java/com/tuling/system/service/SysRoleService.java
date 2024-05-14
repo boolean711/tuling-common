@@ -8,13 +8,16 @@ import com.tuling.system.domain.entity.SysRole;
 import com.tuling.system.domain.vo.SysRoleVo;
 import lombok.Data;
 
+import java.util.List;
+
 
 public interface SysRoleService extends CrudBaseIService<SysRole, SysRoleVo, SysRoleSaveDto> {
 
 
+    List<String> getPermissionCodeByRoleIds(List<Long> roleIds);
 
 
-
+    List<SysRoleVo> getRoleListByUserId(Long userId);
 
 
 }

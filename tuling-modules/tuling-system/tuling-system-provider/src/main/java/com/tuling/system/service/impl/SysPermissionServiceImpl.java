@@ -1,6 +1,8 @@
 package com.tuling.system.service.impl;
 
 
+import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.tuling.common.core.constants.PermissionConstants;
 import com.tuling.common.satoken.utils.LoginHelper;
@@ -13,6 +15,7 @@ import com.tuling.system.mapper.SysPermissionMapper;
 import com.tuling.system.service.SysPermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,4 +35,19 @@ public class SysPermissionServiceImpl
         }
 
     }
+
+
+    @Override
+    public SysPermissionVo getPermissionByCode(String code) {
+
+        LambdaQueryWrapper<SysPermission> lqw = new LambdaQueryWrapper<>();
+
+        lqw.eq(SysPermission::getPermissionCode, code);
+        SysPermission sysPermission = this.getOne(lqw);
+
+
+        return BeanUtil.toBean(sysPermission, SysPermissionVo.class);
+    }
+
+
 }

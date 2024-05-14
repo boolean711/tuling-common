@@ -11,12 +11,10 @@ public class SysRole extends BaseEntity {
 
 
   private String roleName;
-  private String roleKey;
   private Integer roleSort;
-  private String dataScope;
-  private String status;
+  private Boolean status;
   private String remark;
-
+  private Boolean menuCheckStrictly;
 
 
 

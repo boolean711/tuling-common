@@ -24,6 +24,11 @@ import java.util.Map;
 @RequestMapping("/system/menu")
 public class SysMenuController extends CrudBaseController<SysMenuService, SysMenu, SysMenuVo, SysMenuSaveDto> {
 
+    @GetMapping("/getRouters")
+    public ApiResponse<List<SysMenuVo>> getRouters() {
+        return ApiResponse.success(service.getRouters());
+    }
+
     /**
      * 获取菜单下拉树列表
      */

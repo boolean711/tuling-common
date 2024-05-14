@@ -9,26 +9,34 @@ import java.util.List;
 @Data
 public class SysUserVo extends BaseVo {
 
-    private String name;
+    private String nickName;
     private String password;
     private String phoneNum;
     private String avatarUrl;
     private Date lastLoginTime;
-
+    private String code;
 
     private String username;
     private String lastLoginIp;
+    private String status;
+
+
+    private List<SysRoleVo> roleList;
 
 
     private List<String> permissionList;
 
-
     private SysTenantVo tenantVo;
 
-
+    private String gender;
 
 
     private String version;
+
+    private String remark;
+
+
+    private Date createTime;
 
 
 }

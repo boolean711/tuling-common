@@ -16,6 +16,8 @@ import java.util.List;
 public interface SysMenuService extends CrudBaseIService<SysMenu, SysMenuVo, SysMenuSaveDto> {
 
 
+     List<SysMenuVo> getRouters();
+
     List<Long> selectMenuCheckIdList();
 
     List<TreeMenuVo> treeMenuSelect();

@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.tuling.common.core.exception.ServiceException;
 import com.tuling.common.core.param.*;
 import com.tuling.common.utils.BeanListUtils;
 import com.tuling.common.web.builder.QueryBuilder;
@@ -21,10 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -57,7 +55,7 @@ public abstract class CrudBaseServiceImpl
             ));
 
         }
-        return new HashMap<>(0);
+        return Collections.emptyMap();
     }
 
     @Override
@@ -159,7 +157,7 @@ public abstract class CrudBaseServiceImpl
 
         }
 
-        return new ArrayList<>(0);
+        return Collections.emptyList();
 
 
     }
@@ -226,18 +224,18 @@ public abstract class CrudBaseServiceImpl
 
 
     private List<TreeNode> buildTree(List<TreeNode> voList) {
-        // 获取第一个Vo对象的实际类型
+
         Class<? extends TreeNode> voClass = voList.get(0).getClass();
 
-        // 检查是否包含parentId和children字段
+
         Field parentIdField = ReflectUtil.getField(voClass, "parentId");
         Field childrenField = ReflectUtil.getField(voClass, "children");
 
         if (parentIdField == null) {
-            throw new IllegalArgumentException("Vo class must have a 'parentId' field.");
+            throw new ServiceException("Vo class must have a 'parentId' field.");
         }
         if (childrenField == null) {
-            throw new IllegalArgumentException("Vo class must have a 'children' field.");
+            throw new ServiceException("Vo class must have a 'children' field.");
         }
 
         // 创建一个Map，用于根据id快速查找节点
@@ -276,7 +274,7 @@ public abstract class CrudBaseServiceImpl
                     }
                 }
             } catch (IllegalAccessException e) {
-                throw new RuntimeException("Failed to access fields.", e);
+                throw new ServiceException("Failed to access fields.", e);
             }
         }
 
@@ -285,8 +283,8 @@ public abstract class CrudBaseServiceImpl
     }
 
 
-    private static boolean isTreeNode(Object obj) {
-        // 使用反射检查对象的类是否实现了TreeNode接口
+    private  boolean isTreeNode(Object obj) {
+
         Class<?> clazz = obj.getClass();
         for (Class<?> iface : clazz.getInterfaces()) {
             if (iface == TreeNode.class) {

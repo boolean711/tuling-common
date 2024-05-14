@@ -14,5 +14,5 @@ public interface SysUserService extends CrudBaseIService<SysUser, SysUserVo, Sys
     SysUserVo getUserByUsername(String username);
 
 
-
+    void changeUserStatus(Long userId, String status);
 }

@@ -6,6 +6,7 @@ import com.tuling.system.domain.entity.SysRolePermissionRel;
 import com.tuling.system.domain.vo.SysRolePermissionRelVo;
 
 import java.util.List;
+import java.util.Map;
 
 
 public interface SysRolePermissionRelService extends CrudBaseIService<SysRolePermissionRel, SysRolePermissionRelVo, SysRolePermissionRelSaveDto> {
@@ -13,7 +14,10 @@ public interface SysRolePermissionRelService extends CrudBaseIService<SysRolePer
 
 
 
-    List<Long> getPermissionIdListByUserId(Long userId);
+    Map<Long,Long> getRolePermissionIdMap(List<Long> roleId);
+
+
+    void removeByRoleId(Long roleId);
 
 
 }

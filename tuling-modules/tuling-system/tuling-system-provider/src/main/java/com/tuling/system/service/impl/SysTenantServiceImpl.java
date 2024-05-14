@@ -8,13 +8,16 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.tuling.common.core.exception.ServiceException;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
 import com.tuling.system.constants.CommonConstants;
+import com.tuling.system.domain.dto.SysRoleSaveDto;
 import com.tuling.system.domain.dto.SysTenantSaveDto;
+import com.tuling.system.domain.dto.SysUserSaveDto;
 import com.tuling.system.domain.entity.SysTenant;
+import com.tuling.system.domain.entity.SysTenantPackage;
 import com.tuling.system.domain.entity.SysUser;
+import com.tuling.system.domain.vo.SysPermissionVo;
 import com.tuling.system.domain.vo.SysTenantVo;
 import com.tuling.system.mapper.SysTenantMapper;
-import com.tuling.system.service.SysTenantService;
-import com.tuling.system.service.SysUserService;
+import com.tuling.system.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,7 +26,10 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -35,7 +41,7 @@ public class SysTenantServiceImpl
 
     @Autowired
     private SysUserService userService;
-//    @Autowired
+    //    @Autowired
 //    private SysTenantRenewRecordService tenantRenewRecordService;
     @Autowired
     @Qualifier("jacksonRedisTemplate")
@@ -44,10 +50,24 @@ public class SysTenantServiceImpl
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
+    @Autowired
+    private SysTenantPackageService tenantPackageService;
+
+    @Autowired
+    private SysPermissionService permissionService;
+
+    @Autowired
+    private SysRoleService roleService;
 
     @Override
     public void afterSave(SysTenantSaveDto dto, SysTenant entity) {
-        initLoginUser(dto, entity);
+        if (dto.getId() == null) {
+            Long roleId = initTenantAdmin(entity);
+
+            initLoginUser(roleId, entity);
+
+        }
+
 
 //        if (dto.getRenewMonthNum() != null && dto.getRenewMonthNum() > 0) {
 //            insertRecord(dto, entity.getId(), TypeConstants.RECORD_TYPE_RENEW, "月");
@@ -58,6 +78,31 @@ public class SysTenantServiceImpl
 //        if (dto.getId() == null) {
 //            applicationEventPublisher.publishEvent(new AfterSaveTenantEvent(this, entity.getId()));
 //        }
+
+    }
+
+    private Long initTenantAdmin(SysTenant entity) {
+
+
+        SysTenantPackage tenantPackage = tenantPackageService.getById(entity.getPackageId());
+
+        if (tenantPackage == null) {
+            throw new ServiceException("未知租户套餐");
+        }
+
+        String menuIds = tenantPackage.getMenuIds();
+
+        SysPermissionVo permissionByCode = permissionService.getPermissionByCode("system::tenant");
+
+        SysRoleSaveDto roleSaveDto = new SysRoleSaveDto();
+
+        roleSaveDto.setPermissionId(permissionByCode.getId());
+        roleSaveDto.setRoleSort(1);
+        roleSaveDto.setRoleName("租户管理员");
+        roleSaveDto.setStatus(true);
+        roleSaveDto.setMenuIdList(Arrays.stream(menuIds.split(",")).map(Long::parseLong).collect(Collectors.toList()));
+        roleSaveDto.setTenantId(entity.getId());
+        return roleService.saveOrUpdate(roleSaveDto);
 
     }
 
@@ -98,42 +143,22 @@ public class SysTenantServiceImpl
 //
 //    }
 
-    private void initLoginUser(SysTenantSaveDto dto, SysTenant entity) {
-        SysUser sysUser = null;
+    private void initLoginUser(Long roleId, SysTenant entity) {
+        SysUserSaveDto sysUser = new SysUserSaveDto();
 
-        if (dto.getId() == null) {
-            sysUser = new SysUser();
-            sysUser.setPassword(BCrypt.hashpw(CommonConstants.DEFAULT_PASSWORD));
-        } else {
-            LambdaQueryWrapper<SysUser> lqw = new LambdaQueryWrapper<>();
-
-            lqw.eq(SysUser::getTenantId, entity.getId());
-            List<SysUser> list = userService.list(lqw);
-
-            if (CollectionUtils.isNotEmpty(list)) {
-                sysUser = list.get(0);
-            } else {
-                sysUser = new SysUser();
-                sysUser.setPassword(BCrypt.hashpw(CommonConstants.DEFAULT_PASSWORD));
-            }
-
-        }
-
-        sysUser.setName(entity.getName());
+        sysUser.setNickName(entity.getName() + "管理员");
+        sysUser.setPassword(BCrypt.hashpw(CommonConstants.DEFAULT_PASSWORD));
         sysUser.setPhoneNum(entity.getPhoneNum());
-        //暂停为手机号码
+        //暂为手机号码
         sysUser.setUsername(entity.getPhoneNum());
-
-
         /**
          *   user查询时不拼租户,新增时手动设置租户信息
          */
-
         sysUser.setTenantId(entity.getId());
+        sysUser.setRoleIds(Collections.singletonList(roleId));
+
         userService.saveOrUpdate(sysUser);
-        if (dto.getRenewMonthNum()>0){
-            StpUtil.logout(sysUser.getId());
-        }
+
 
     }
 
@@ -183,7 +208,7 @@ public class SysTenantServiceImpl
             throw new ServiceException("未知租户数据");
         }
 
-        if (qty>0){
+        if (qty > 0) {
             tenant.setTextMessageQty(tenant.getTextMessageQty() - qty);
             this.updateById(tenant);
 
