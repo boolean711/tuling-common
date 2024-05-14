@@ -65,6 +65,12 @@ public class TlLoginUser implements LoginUserDetails {
 
     @Override
     @JsonIgnore
+    public String getNickName() {
+        return  sysUserVo.getNickName();
+    }
+
+    @Override
+    @JsonIgnore
     public boolean isAccountNonExpired() {
         return checkTenantValid();
     }
@@ -95,7 +101,7 @@ public class TlLoginUser implements LoginUserDetails {
         if (CollectionUtils.isNotEmpty(permissionList)) {
             return permissionList.contains(PermissionConstants.ADMIN);
         }
-        return true;
+        return false;
     }
 
     @Override

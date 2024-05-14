@@ -8,9 +8,12 @@ import com.tuling.system.domain.vo.SysTenantVo;
 
 
 import java.util.Date;
+import java.util.List;
 
 
 public interface SysTenantService extends CrudBaseIService<SysTenant, SysTenantVo, SysTenantSaveDto> {
+
+    List<SysTenantVo> getTenantByUserName(String userName);
 
 
     boolean resetPassword(Long tenantId);

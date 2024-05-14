@@ -61,6 +61,8 @@ public class SpringMvcConfig implements WebMvcConfigurer {
         // 注册 Sa-Token 拦截器，定义详细认证规则
         if (saTokenInterceptorHandler!=null){
             registry.addInterceptor(new SaInterceptor(saTokenInterceptorHandler)).addPathPatterns("/**");
+            // 注册 Sa-Token 拦截器，打开注解式鉴权功能
+            registry.addInterceptor(new SaInterceptor()).addPathPatterns("/**");
         }
 
     }

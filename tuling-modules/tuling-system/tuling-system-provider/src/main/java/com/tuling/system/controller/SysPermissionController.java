@@ -1,6 +1,8 @@
 package com.tuling.system.controller;
 
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.tuling.common.core.constants.PermissionConstants;
 import com.tuling.common.web.controller.CrudBaseController;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
 import com.tuling.system.domain.dto.SysPermissionSaveDto;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/system/permission")
+@SaCheckPermission(PermissionConstants.ADMIN)
 public class SysPermissionController
         extends CrudBaseController<SysPermissionService, SysPermission, SysPermissionVo, SysPermissionSaveDto> {
 

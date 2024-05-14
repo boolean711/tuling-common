@@ -11,6 +11,8 @@ public interface LoginUserDetails {
 
     String getUsername();
 
+    String getNickName();
+
     boolean isAccountNonExpired();
 
     boolean isAccountNonLocked();

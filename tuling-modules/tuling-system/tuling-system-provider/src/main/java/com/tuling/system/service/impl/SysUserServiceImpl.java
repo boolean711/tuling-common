@@ -7,7 +7,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 
+import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import com.tuling.common.core.exception.ServiceException;
+import com.tuling.common.utils.BeanListUtils;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
 import com.tuling.system.constants.CommonConstants;
 import com.tuling.system.domain.dto.SysUserSaveDto;
@@ -91,21 +93,23 @@ public class SysUserServiceImpl
 
 
     @Override
-    public SysUserVo getUserByUsername(String username) {
+    public List<SysUserVo> getUserByUsername(String username,Long tenantId) {
         if (StrUtil.isNotBlank(username)) {
             LambdaQueryWrapper<SysUser> lqw = new LambdaQueryWrapper<>();
 
-            lqw.eq(SysUser::getPhoneNum, username);
+            lqw.eq(SysUser::getUsername, username);
 
+            if (tenantId!=null){
+                lqw.eq(SysUser::getTenantId, tenantId);
+            }
             List<SysUser> list = this.list(lqw);
 
             if (CollectionUtils.isNotEmpty(list)) {
-                SysUserVo vo = new SysUserVo();
-                BeanUtils.copyProperties(list.get(0), vo);
-                return vo;
+                return BeanListUtils.copyList(list,SysUserVo.class);
+
             }
         }
-        return null;
+        return Collections.emptyList();
     }
 
     @Override

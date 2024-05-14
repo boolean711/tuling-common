@@ -1,6 +1,7 @@
 package com.tuling.system.domain.entity;
 
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.tuling.common.core.param.BaseEntity;
 import lombok.Data;
@@ -13,7 +14,8 @@ public class SysTenantPackage extends BaseEntity {
   private String menuIds;
   private String remark;
   private Boolean menuCheckStrictly;
-  private String status;
-
+  private Boolean status;
+  @TableField(exist = false)
+  private Long tenantId;
 
 }

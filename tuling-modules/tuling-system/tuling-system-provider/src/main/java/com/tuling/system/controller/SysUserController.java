@@ -1,6 +1,9 @@
 package com.tuling.system.controller;
 
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import cn.dev33.satoken.annotation.SaMode;
+import com.tuling.common.core.constants.PermissionConstants;
 import com.tuling.common.core.param.ApiResponse;
 import com.tuling.common.web.controller.CrudBaseController;
 import com.tuling.system.domain.dto.SysUserSaveDto;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/system/user")
+@SaCheckPermission(value = {PermissionConstants.ADMIN, PermissionConstants.TENANT_ADMIN}, mode = SaMode.OR)
 public class SysUserController extends CrudBaseController<SysUserService, SysUser, SysUserVo, SysUserSaveDto> {
 
 

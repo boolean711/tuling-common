@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 
 import com.tuling.common.core.exception.ServiceException;
+import com.tuling.common.utils.BeanListUtils;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
 import com.tuling.system.constants.CommonConstants;
 import com.tuling.system.domain.dto.SysRoleSaveDto;
@@ -16,6 +17,7 @@ import com.tuling.system.domain.entity.SysTenantPackage;
 import com.tuling.system.domain.entity.SysUser;
 import com.tuling.system.domain.vo.SysPermissionVo;
 import com.tuling.system.domain.vo.SysTenantVo;
+import com.tuling.system.domain.vo.SysUserVo;
 import com.tuling.system.mapper.SysTenantMapper;
 import com.tuling.system.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -107,20 +109,6 @@ public class SysTenantServiceImpl
     }
 
 
-    @Override
-    public void beforeSave(SysTenantSaveDto dto) {
-
-        LambdaQueryWrapper<SysTenant> lqw = new LambdaQueryWrapper<>();
-
-        lqw.eq(SysTenant::getPhoneNum, dto.getPhoneNum());
-        if (dto.getId() != null) {
-            lqw.ne(SysTenant::getId, dto.getId());
-        }
-        if (this.count(lqw) > 0) {
-            throw new ServiceException("该手机号码已绑定租户");
-        }
-    }
-
 //    private void insertRecord(SysTenantSaveDto dto, Long id, Integer type, String unit) {
 //
 //
@@ -162,6 +150,34 @@ public class SysTenantServiceImpl
 
     }
 
+
+    @Override
+    public List<SysTenantVo> getTenantByUserName(String userName) {
+
+        List<SysUserVo> userByUsername = userService.getUserByUsername(userName,null);
+
+        if (CollectionUtils.isNotEmpty(userByUsername)) {
+            List<Long> tenantIds = userByUsername.stream().map(SysUserVo::getTenantId).collect(Collectors.toList());
+
+            List<SysTenant> sysTenants = this.listByIds(tenantIds);
+
+            List<SysTenantVo> tenantVoList = BeanListUtils.copyList(sysTenants, SysTenantVo.class);
+
+            if (tenantIds.contains(-1L)) {
+                SysTenantVo admin = new SysTenantVo();
+                admin.setName("超级管理员");
+                admin.setId(-1L);
+                tenantVoList.add(admin);
+            }
+
+            return tenantVoList;
+
+
+        }
+
+
+        return Collections.emptyList();
+    }
 
     @Override
     @Transactional

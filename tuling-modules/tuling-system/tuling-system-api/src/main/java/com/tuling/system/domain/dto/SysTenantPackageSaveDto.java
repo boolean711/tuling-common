@@ -12,7 +12,7 @@ public class SysTenantPackageSaveDto extends BaseSaveDto {
   private String menuIds;
   private String remark;
   private Boolean menuCheckStrictly;
-  private String status;
+  private Boolean status;
 
 
 }

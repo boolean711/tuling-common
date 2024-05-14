@@ -1,9 +1,12 @@
 package com.tuling.system.controller;
 
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.tuling.common.core.constants.PermissionConstants;
 import com.tuling.common.core.param.ApiResponse;
 import com.tuling.common.web.controller.CrudBaseController;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
+import com.tuling.system.constants.CommonConstants;
 import com.tuling.system.domain.dto.SysMenuSaveDto;
 import com.tuling.system.domain.entity.SysMenu;
 import com.tuling.system.domain.vo.SysMenuVo;
@@ -11,10 +14,8 @@ import com.tuling.system.domain.vo.TreeMenuVo;
 import com.tuling.system.mapper.SysMenuMapper;
 import com.tuling.system.service.SysMenuService;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -43,5 +44,16 @@ public class SysMenuController extends CrudBaseController<SysMenuService, SysMen
         return ApiResponse.success(res);
     }
 
+    @Override
+    @SaCheckPermission(PermissionConstants.ADMIN)
+    @PostMapping("/saveOrUpdate")
+    public ApiResponse<Long> saveOrUpdate(@Validated @RequestBody SysMenuSaveDto dto) {
+        return super.saveOrUpdate(dto);
+    }
 
+    @Override
+    @SaCheckPermission(PermissionConstants.ADMIN)
+    public ApiResponse<Boolean> removeByIds(List<Long> ids) {
+        return super.removeByIds(ids);
+    }
 }

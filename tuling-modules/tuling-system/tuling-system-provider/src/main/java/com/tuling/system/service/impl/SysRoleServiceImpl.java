@@ -2,7 +2,6 @@ package com.tuling.system.service.impl;
 
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.tuling.common.utils.BeanListUtils;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
 import com.tuling.system.domain.dto.SysRoleSaveDto;
 import com.tuling.system.domain.entity.SysRole;
@@ -132,9 +131,7 @@ public class SysRoleServiceImpl extends CrudBaseServiceImpl<SysRole, SysRoleVo, 
 
             List<Long> roleIds = userRoleIdMap.get(userId);
 
-            List<SysRole> sysRoles = this.listByIds(roleIds);
-
-            return BeanListUtils.copyList(sysRoles,SysRoleVo.class);
+            return this.baseMapper.listByIdsIgnoreTenant(roleIds);
 
 
         }

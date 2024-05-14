@@ -81,7 +81,7 @@ public class InjectionMetaObjectHandler implements MetaObjectHandler {
             this.strictInsertFill(metaObject, "updateTime", Date.class, now);
         }
         if (metaObject.hasSetter("updateName") && getFieldValByName("updateName", metaObject) == null) {
-            this.strictInsertFill(metaObject, "updateName", String.class, loginUser.getUsername());
+            this.strictInsertFill(metaObject, "updateName", String.class, loginUser.getNickName());
         }
         if (metaObject.hasSetter("updateId") && getFieldValByName("updateId", metaObject) == null) {
             this.strictInsertFill(metaObject, "updateId", Long.class, loginUser.getId());
@@ -94,7 +94,7 @@ public class InjectionMetaObjectHandler implements MetaObjectHandler {
             this.strictInsertFill(metaObject, "createTime", Date.class, now);
         }
         if (metaObject.hasSetter("createName") && getFieldValByName("createName", metaObject) == null) {
-            this.strictInsertFill(metaObject, "createName", String.class, loginUser.getUsername());
+            this.strictInsertFill(metaObject, "createName", String.class, loginUser.getNickName());
         }
         if (metaObject.hasSetter("createId") && getFieldValByName("createId", metaObject) == null) {
             this.strictInsertFill(metaObject, "createId", Long.class, loginUser.getId());
