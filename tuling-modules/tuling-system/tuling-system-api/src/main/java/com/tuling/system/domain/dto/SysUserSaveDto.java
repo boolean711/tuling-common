@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 public class SysUserSaveDto extends BaseSaveDto {
 
-
+    private String code;
     private String nickName;
     private String password;
     private String phoneNum;

@@ -58,6 +58,7 @@ public abstract class CrudBaseServiceImpl
         return Collections.emptyMap();
     }
 
+
     @Override
     public IPage<VO> pageListByExpression(ExpressionQueryDto<E> queryDto) {
 
@@ -139,12 +140,8 @@ public abstract class CrudBaseServiceImpl
 
 
     @Override
-    public <T extends BaseTreeVo> List<T> buildTree(Class<T > prototypeClass) {
-        ExpressionQueryDto<BaseEntity> queryDto = new ExpressionQueryDto<>();
-        queryDto.setNeedPage(false);
+    public <T extends BaseTreeVo> List<T> buildTree(Class<T > prototypeClass, List<VO> records ) {
 
-        IPage<VO> voiPage = this.pageListByExpression((ExpressionQueryDto<E>) queryDto);
-        List<VO> records = voiPage.getRecords();
 
         if (CollectionUtil.isNotEmpty(records) && isTreeNode(records.get(0))) {
             List<TreeNode> treeNodes = records.stream()

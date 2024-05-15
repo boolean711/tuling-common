@@ -20,4 +20,8 @@ public class SysRoleVo extends BaseVo {
 
   private Date createTime;
   private Boolean menuCheckStrictly;
+
+  private String tenantName;
+
+  private Long tenantId;
 }

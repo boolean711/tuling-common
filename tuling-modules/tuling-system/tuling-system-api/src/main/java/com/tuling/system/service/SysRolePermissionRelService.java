@@ -20,4 +20,6 @@ public interface SysRolePermissionRelService extends CrudBaseIService<SysRolePer
     void removeByRoleId(Long roleId);
 
 
+
+
 }

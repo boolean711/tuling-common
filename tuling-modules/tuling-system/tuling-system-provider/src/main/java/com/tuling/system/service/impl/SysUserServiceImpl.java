@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 
 import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import com.tuling.common.core.exception.ServiceException;
+import com.tuling.common.satoken.utils.LoginHelper;
 import com.tuling.common.utils.BeanListUtils;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
 import com.tuling.system.constants.CommonConstants;
@@ -18,6 +19,7 @@ import com.tuling.system.domain.entity.SysUserRoleRel;
 import com.tuling.system.domain.vo.SysRoleVo;
 import com.tuling.system.domain.vo.SysUserVo;
 import com.tuling.system.mapper.SysUserMapper;
+import com.tuling.system.service.SysCodeRuleService;
 import com.tuling.system.service.SysRoleService;
 import com.tuling.system.service.SysUserRoleRelService;
 import com.tuling.system.service.SysUserService;
@@ -26,10 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -45,6 +44,9 @@ public class SysUserServiceImpl
     @Autowired
     private SysRoleService roleService;
 
+    @Autowired
+    private SysCodeRuleService codeRuleService;
+
 
     @Override
     public void beforeSave(SysUserSaveDto dto) {
@@ -57,6 +59,11 @@ public class SysUserServiceImpl
             }
 
             userRoleRelService.removeByUserId(dto.getId());
+        }else{
+            if (StrUtil.isBlank(dto.getCode())){
+                dto.setCode(codeRuleService.generateCode(CommonConstants.USER_CODE_PREFIX));
+            }
+
         }
     }
 
@@ -80,8 +87,18 @@ public class SysUserServiceImpl
 
     @Override
     public void afterPageListByExpression(List<SysUserVo> records) {
+        //用户没有租户隔离 需要手动隔离
 
+        records.removeIf(item -> {
+            if (LoginHelper.isAdmin()) {
+                return false;
+            }
+            Long currentTenantId = LoginHelper.getCurrentTenantId();
+            return !Objects.equals(item.getTenantId(), currentTenantId);
+
+        });
         syncInfo(records);
+
 
     }
 
@@ -91,21 +108,20 @@ public class SysUserServiceImpl
     }
 
 
-
     @Override
-    public List<SysUserVo> getUserByUsername(String username,Long tenantId) {
+    public List<SysUserVo> getUserByUsername(String username, Long tenantId) {
         if (StrUtil.isNotBlank(username)) {
             LambdaQueryWrapper<SysUser> lqw = new LambdaQueryWrapper<>();
 
             lqw.eq(SysUser::getUsername, username);
 
-            if (tenantId!=null){
+            if (tenantId != null) {
                 lqw.eq(SysUser::getTenantId, tenantId);
             }
             List<SysUser> list = this.list(lqw);
 
             if (CollectionUtils.isNotEmpty(list)) {
-                return BeanListUtils.copyList(list,SysUserVo.class);
+                return BeanListUtils.copyList(list, SysUserVo.class);
 
             }
         }
@@ -141,6 +157,7 @@ public class SysUserServiceImpl
 
             List<SysRoleVo> roleVoList = new ArrayList<>();
 
+            record.setPassword(null);
             Long id = record.getId();
             List<Long> roleIds = userRoleIdMap.get(id);
             if (CollectionUtils.isNotEmpty(roleIds)) {

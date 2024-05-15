@@ -28,7 +28,10 @@ public class SysUserRoleRelServiceImpl extends CrudBaseServiceImpl<SysUserRoleRe
     public Map<Long, List<Long>> getUserRoleIdMap(List<Long> userIds) {
         LambdaQueryWrapper<SysUserRoleRel> lqw = new LambdaQueryWrapper<>();
 
-        lqw.in(SysUserRoleRel::getUserId, userIds);
+        if (CollectionUtils.isNotEmpty(userIds)){
+            lqw.in(SysUserRoleRel::getUserId, userIds);
+        }
+
 
         List<SysUserRoleRel> list = this.list(lqw);
 

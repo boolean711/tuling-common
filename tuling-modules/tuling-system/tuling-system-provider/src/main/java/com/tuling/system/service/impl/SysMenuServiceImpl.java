@@ -3,6 +3,7 @@ package com.tuling.system.service.impl;
 
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.crypto.digest.BCrypt;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.tuling.common.core.exception.ServiceException;
 import com.tuling.common.core.param.BaseEntity;
@@ -14,18 +15,18 @@ import com.tuling.common.utils.BeanListUtils;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
 import com.tuling.system.domain.dto.SysMenuSaveDto;
 import com.tuling.system.domain.entity.SysMenu;
+import com.tuling.system.domain.entity.SysTenant;
+import com.tuling.system.domain.entity.SysTenantPackage;
 import com.tuling.system.domain.vo.SysMenuVo;
+import com.tuling.system.domain.vo.SysTenantVo;
 import com.tuling.system.domain.vo.TreeMenuVo;
 import com.tuling.system.mapper.SysMenuMapper;
-import com.tuling.system.service.SysMenuService;
-import com.tuling.system.service.SysRoleMenuRelService;
-import com.tuling.system.service.SysRolePermissionRelService;
+import com.tuling.system.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -35,17 +36,24 @@ public class SysMenuServiceImpl extends CrudBaseServiceImpl<SysMenu, SysMenuVo, 
     @Autowired
     private SysRoleMenuRelService roleMenuRelService;
 
+    @Autowired
+    private SysTenantPackageService tenantPackageService;
+
+
+    @Autowired
+    private SysTenantService tenantService;
+
     @Override
     public List<SysMenuVo> getRouters() {
-        List<SysMenuVo> res=null;
+        List<SysMenuVo> res = null;
         if (LoginHelper.isAdmin()) {
             //如果是超级管理员，返回所有菜单
             ExpressionQueryDto<SysMenu> queryDto = new ExpressionQueryDto<>();
 
             queryDto.setNeedPage(false);
 
-            res= this.pageListByExpression(queryDto).getRecords();
-        }else{
+            res = this.pageListByExpression(queryDto).getRecords();
+        } else {
             List<Long> menuIdListByRoleIds = roleMenuRelService.getMenuIdListByRoleIds(LoginHelper.getRoleIdList());
 
             if (CollectionUtils.isEmpty(menuIdListByRoleIds)) {
@@ -53,7 +61,7 @@ public class SysMenuServiceImpl extends CrudBaseServiceImpl<SysMenu, SysMenuVo, 
             }
 
             List<SysMenu> sysMenus = this.listByIds(menuIdListByRoleIds);
-            res=BeanListUtils.copyList(sysMenus, SysMenuVo.class);
+            res = BeanListUtils.copyList(sysMenus, SysMenuVo.class);
         }
         res.sort(Comparator.comparing(SysMenuVo::getOrderNum));
         return res;
@@ -62,21 +70,39 @@ public class SysMenuServiceImpl extends CrudBaseServiceImpl<SysMenu, SysMenuVo, 
     }
 
     @Override
-    public List<Long> selectMenuCheckIdList() {
+    public List<Long> selectMenuCheckIdList(Long roleId) {
 
-        return roleMenuRelService.getMenuIdListByRoleIds(LoginHelper.getRoleIdList());
+        return roleMenuRelService.getMenuIdListByRoleIds(Collections.singletonList(roleId));
     }
 
     @Override
     public List<TreeMenuVo> treeMenuSelect() {
-        if (LoginHelper.isAdmin()) {
-            //如果是超级管理员，返回所有菜单
-            return super.buildTree(TreeMenuVo.class);
+        //如果是超级管理员，返回所有菜单
+        ExpressionQueryDto<SysMenu> queryDto = new ExpressionQueryDto<>();
+        queryDto.setNeedPage(false);
+
+        IPage<SysMenuVo> voiPage = this.pageListByExpression(queryDto);
+        List<SysMenuVo> records = voiPage.getRecords();
+        if (!LoginHelper.isAdmin()) {
+            //TODO如果是普通用户，返回租户套餐中的菜单
+            Long currentTenantId = LoginHelper.getCurrentTenantId();
+            SysTenant tenant = tenantService.getById(currentTenantId);
+
+            if (tenant == null) {
+                throw new ServiceException("未知租户信息，请联系管理员");
+            }
+            SysTenantPackage tenantPackage = tenantPackageService.getById(tenant.getPackageId());
+
+            if (tenantPackage == null) {
+                throw new ServiceException("未知租户信息，请联系管理员");
+            }
+            List<String> packageMenuIds = Arrays.asList(tenantPackage.getMenuIds().split(","));
+
+            records = records.stream().filter(item -> packageMenuIds.contains(String.valueOf(item.getId()))).collect(Collectors.toList());
+
         }
 
-
-        //TODO如果是普通用户，返回角色对应的菜单
-        return new ArrayList<>(0);
+        return super.buildTree(TreeMenuVo.class, records);
     }
 
 }

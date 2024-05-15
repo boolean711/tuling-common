@@ -1,17 +1,23 @@
 package com.tuling.system.service.impl;
 
 
+import cn.hutool.extra.spring.SpringUtil;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.tuling.common.core.constants.PermissionConstants;
+import com.tuling.common.core.exception.ServiceException;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
 import com.tuling.system.domain.dto.SysRoleSaveDto;
 import com.tuling.system.domain.entity.SysRole;
 import com.tuling.system.domain.entity.SysRoleMenuRel;
 import com.tuling.system.domain.entity.SysRolePermissionRel;
+import com.tuling.system.domain.entity.SysTenant;
 import com.tuling.system.domain.vo.SysPermissionVo;
 import com.tuling.system.domain.vo.SysRoleVo;
+import com.tuling.system.domain.vo.SysTenantVo;
 import com.tuling.system.mapper.SysRoleMapper;
 import com.tuling.system.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -36,9 +42,17 @@ public class SysRoleServiceImpl extends CrudBaseServiceImpl<SysRole, SysRoleVo, 
     @Autowired
     private SysUserRoleRelService userRoleRelService;
 
+
+    @Autowired
+    @Lazy
+    private SysTenantService tenantService;
+
     @Override
     public void beforeSave(SysRoleSaveDto dto) {
         if (dto.getId() != null) {
+            if (permissionService.isGivenPermissionByRoleId(dto.getId(), Arrays.asList(PermissionConstants.TENANT_ADMIN,PermissionConstants.ADMIN))) {
+                throw new ServiceException("管理员角色无法修改");
+            }
             roleMenuRelService.removeByRoleId(dto.getId());
             rolePermissionRelService.removeByRoleId(dto.getId());
         }
@@ -69,10 +83,7 @@ public class SysRoleServiceImpl extends CrudBaseServiceImpl<SysRole, SysRoleVo, 
 
     @Override
     public void afterPageListByExpression(List<SysRoleVo> records) {
-
         syncInfo(records);
-
-
     }
 
 
@@ -81,6 +92,26 @@ public class SysRoleServiceImpl extends CrudBaseServiceImpl<SysRole, SysRoleVo, 
         syncInfo(Collections.singletonList(vo));
     }
 
+    @Override
+    public void beforeRemove(List<SysRole> entityList) {
+        for (SysRole role : entityList) {
+            if (permissionService.isGivenPermissionByRoleId(role.getId(), Arrays.asList(PermissionConstants.TENANT_ADMIN,PermissionConstants.ADMIN))) {
+                throw new ServiceException("管理员角色无法删除");
+            }
+
+        }
+    }
+
+    @Override
+    public void afterRemove(List<SysRole> entityList) {
+
+        for (SysRole role : entityList) {
+
+            roleMenuRelService.removeByRoleId(role.getId());
+            rolePermissionRelService.removeByRoleId(role.getId());
+        }
+
+    }
 
     private void syncInfo(List<SysRoleVo> records) {
         Map<Long, SysPermissionVo> idVoMap = permissionService.getIdVoMap(null);
@@ -90,6 +121,10 @@ public class SysRoleServiceImpl extends CrudBaseServiceImpl<SysRole, SysRoleVo, 
 
         Map<Long, Long> rolePermissionIdMap = rolePermissionRelService.getRolePermissionIdMap(roleIdList);
 
+
+        Map<Long, SysTenantVo> tenantVoMap = tenantService.getIdVoMap(null);
+
+
         for (SysRoleVo record : records) {
             Long permissionId = rolePermissionIdMap.get(record.getId());
 
@@ -98,6 +133,13 @@ public class SysRoleServiceImpl extends CrudBaseServiceImpl<SysRole, SysRoleVo, 
             if (sysPermissionVo != null) {
                 record.setPermissionName(sysPermissionVo.getPermissionName());
                 record.setPermissionId(permissionId);
+            }
+            SysTenantVo tenantVo = tenantVoMap.get(record.getTenantId());
+
+
+
+            if (tenantVo!=null){
+                record.setTenantName(tenantVo.getName());
             }
 
 
@@ -114,7 +156,7 @@ public class SysRoleServiceImpl extends CrudBaseServiceImpl<SysRole, SysRoleVo, 
         List<String> res=new ArrayList<>();
 
         for (Map.Entry<Long, Long> entry : rolePermissionIdMap.entrySet()) {
-            SysPermissionVo sysPermissionVo = idVoMap.get(entry.getKey());
+            SysPermissionVo sysPermissionVo = idVoMap.get(entry.getValue());
             if (sysPermissionVo!=null){
                 res.add(sysPermissionVo.getPermissionCode());
             }

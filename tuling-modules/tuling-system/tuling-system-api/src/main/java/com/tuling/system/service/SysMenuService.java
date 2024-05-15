@@ -18,7 +18,7 @@ public interface SysMenuService extends CrudBaseIService<SysMenu, SysMenuVo, Sys
 
      List<SysMenuVo> getRouters();
 
-    List<Long> selectMenuCheckIdList();
+    List<Long> selectMenuCheckIdList(Long roleId);
 
     List<TreeMenuVo> treeMenuSelect();
 }

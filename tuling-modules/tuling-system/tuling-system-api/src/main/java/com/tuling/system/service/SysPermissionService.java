@@ -16,7 +16,13 @@ public interface SysPermissionService extends CrudBaseIService<SysPermission, Sy
 
     SysPermissionVo getPermissionByCode(String code);
 
-
+    /**
+     * 根据角色id判断是否是指具有指定权限
+     * @param roleId
+     * @param permissionCode
+     * @return
+     */
+    boolean isGivenPermissionByRoleId(Long roleId,List<String> permissionCode);
 
 
 

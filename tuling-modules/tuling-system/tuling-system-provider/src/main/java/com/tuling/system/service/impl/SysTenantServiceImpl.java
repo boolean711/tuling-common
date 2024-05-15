@@ -1,6 +1,7 @@
 package com.tuling.system.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.BCrypt;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -49,9 +50,9 @@ public class SysTenantServiceImpl
     @Qualifier("jacksonRedisTemplate")
     private RedisTemplate<String, Object> redisTemplate;
 
-    @Autowired
-    private ApplicationEventPublisher applicationEventPublisher;
 
+    @Autowired
+    private SysCodeRuleService codeRuleService;
     @Autowired
     private SysTenantPackageService tenantPackageService;
 
@@ -60,6 +61,14 @@ public class SysTenantServiceImpl
 
     @Autowired
     private SysRoleService roleService;
+
+    @Override
+    public void beforeSave(SysTenantSaveDto dto) {
+
+       if (dto.getId()==null|| StrUtil.isBlank(dto.getTenantCode())){
+           dto.setTenantCode(codeRuleService.generateCode(CommonConstants.TENANT_INFO_CODE_PREFIX));
+       }
+    }
 
     @Override
     public void afterSave(SysTenantSaveDto dto, SysTenant entity) {
@@ -77,9 +86,7 @@ public class SysTenantServiceImpl
 //        if (dto.getTextMessageQty() != null && dto.getTextMessageQty() > 0) {
 //            insertRecord(dto, entity.getId(), TypeConstants.RECORD_TYPE_MESSAGE, "条");
 //        }
-//        if (dto.getId() == null) {
-//            applicationEventPublisher.publishEvent(new AfterSaveTenantEvent(this, entity.getId()));
-//        }
+
 
     }
 

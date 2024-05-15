@@ -3,6 +3,7 @@ package com.tuling.system.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.tuling.common.core.constants.PermissionConstants;
+import com.tuling.common.core.exception.ServiceException;
 import com.tuling.common.core.param.ApiResponse;
 import com.tuling.common.web.controller.CrudBaseController;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
@@ -33,11 +34,15 @@ public class SysMenuController extends CrudBaseController<SysMenuService, SysMen
     /**
      * 获取菜单下拉树列表
      */
-    @GetMapping("/treeSelect/{isFindChecked}")
-    public ApiResponse<Map<String, Object>> treeSelect(@PathVariable boolean isFindChecked) {
+    @GetMapping("/treeSelect")
+    public ApiResponse<Map<String, Object>> treeSelect(@RequestParam("isFindChecked") boolean isFindChecked
+            , @RequestParam(value = "roleId", required = false) Long roleId) {
         Map<String, Object> res = new HashMap<>();
         if (isFindChecked) {
-            res.put("checkedKeys", service.selectMenuCheckIdList());
+            if (roleId == null) {
+                throw new ServiceException("未知角色");
+            }
+            res.put("checkedKeys", service.selectMenuCheckIdList(roleId));
         }
 
         res.put("menus", service.treeMenuSelect());
