@@ -5,6 +5,7 @@ import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.crypto.digest.BCrypt;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.tuling.common.core.constants.PermissionConstants;
 import com.tuling.common.core.exception.ServiceException;
 import com.tuling.common.core.param.BaseEntity;
 import com.tuling.common.core.param.BaseTreeVo;
@@ -15,6 +16,7 @@ import com.tuling.common.utils.BeanListUtils;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
 import com.tuling.system.domain.dto.SysMenuSaveDto;
 import com.tuling.system.domain.entity.SysMenu;
+import com.tuling.system.domain.entity.SysRoleMenuRel;
 import com.tuling.system.domain.entity.SysTenant;
 import com.tuling.system.domain.entity.SysTenantPackage;
 import com.tuling.system.domain.vo.SysMenuVo;
@@ -37,11 +39,27 @@ public class SysMenuServiceImpl extends CrudBaseServiceImpl<SysMenu, SysMenuVo, 
     private SysRoleMenuRelService roleMenuRelService;
 
     @Autowired
+    private SysRoleService roleService;
+
+    @Autowired
     private SysTenantPackageService tenantPackageService;
 
 
     @Autowired
     private SysTenantService tenantService;
+
+    @Override
+    public void afterSave(SysMenuSaveDto dto, SysMenu entity) {
+
+        Long adminRoleId = roleService.getRoleIdByPermissionCode(PermissionConstants.ADMIN);
+
+        SysRoleMenuRel sysRoleMenuRel = new SysRoleMenuRel();
+
+        sysRoleMenuRel.setMenuId(entity.getId());
+        sysRoleMenuRel.setRoleId(adminRoleId);
+
+        roleMenuRelService.save(sysRoleMenuRel);
+    }
 
     @Override
     public List<SysMenuVo> getRouters() {

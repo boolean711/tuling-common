@@ -112,6 +112,59 @@ public class SysRoleServiceImpl extends CrudBaseServiceImpl<SysRole, SysRoleVo, 
         }
 
     }
+    @Override
+    public Long getRoleIdByPermissionCode(String permissionCode) {
+
+        SysPermissionVo permissionByCode = permissionService.getPermissionByCode(permissionCode);
+
+        if (permissionByCode!=null){
+            Long permissionId = permissionByCode.getId();
+
+            Map<Long, Long> permissionRoleIdMap = rolePermissionRelService.getPermissionRoleIdMap(Collections.singletonList(permissionId));
+
+            return  permissionRoleIdMap.get(permissionId);
+
+        }
+
+        return null;
+    }
+
+
+    @Override
+    public List<String> getPermissionCodeByRoleIds(List<Long> roleIds) {
+
+
+        Map<Long, Long> rolePermissionIdMap = rolePermissionRelService.getRolePermissionIdMap(roleIds);
+        Map<Long, SysPermissionVo> idVoMap = permissionService.getIdVoMap(null);
+
+        List<String> res=new ArrayList<>();
+
+        for (Map.Entry<Long, Long> entry : rolePermissionIdMap.entrySet()) {
+            SysPermissionVo sysPermissionVo = idVoMap.get(entry.getValue());
+            if (sysPermissionVo!=null){
+                res.add(sysPermissionVo.getPermissionCode());
+            }
+        }
+        return res;
+    }
+
+
+
+    @Override
+    public List<SysRoleVo> getRoleListByUserId(Long userId) {
+
+        Map<Long, List<Long>> userRoleIdMap = userRoleRelService.getUserRoleIdMap(Collections.singletonList(userId));
+
+        if (CollectionUtils.isNotEmpty(userRoleIdMap)){
+
+            List<Long> roleIds = userRoleIdMap.get(userId);
+
+            return this.baseMapper.listByIdsIgnoreTenant(roleIds);
+
+
+        }
+        return Collections.emptyList();
+    }
 
     private void syncInfo(List<SysRoleVo> records) {
         Map<Long, SysPermissionVo> idVoMap = permissionService.getIdVoMap(null);
@@ -144,39 +197,5 @@ public class SysRoleServiceImpl extends CrudBaseServiceImpl<SysRole, SysRoleVo, 
 
 
         }
-    }
-
-    @Override
-    public List<String> getPermissionCodeByRoleIds(List<Long> roleIds) {
-
-
-        Map<Long, Long> rolePermissionIdMap = rolePermissionRelService.getRolePermissionIdMap(roleIds);
-        Map<Long, SysPermissionVo> idVoMap = permissionService.getIdVoMap(null);
-
-        List<String> res=new ArrayList<>();
-
-        for (Map.Entry<Long, Long> entry : rolePermissionIdMap.entrySet()) {
-            SysPermissionVo sysPermissionVo = idVoMap.get(entry.getValue());
-            if (sysPermissionVo!=null){
-                res.add(sysPermissionVo.getPermissionCode());
-            }
-        }
-        return res;
-    }
-
-    @Override
-    public List<SysRoleVo> getRoleListByUserId(Long userId) {
-
-        Map<Long, List<Long>> userRoleIdMap = userRoleRelService.getUserRoleIdMap(Collections.singletonList(userId));
-
-        if (CollectionUtils.isNotEmpty(userRoleIdMap)){
-
-            List<Long> roleIds = userRoleIdMap.get(userId);
-
-            return this.baseMapper.listByIdsIgnoreTenant(roleIds);
-
-
-        }
-        return Collections.emptyList();
     }
 }

@@ -18,7 +18,17 @@ import java.util.Map;
 public interface SysUserRoleRelService extends CrudBaseIService<SysUserRoleRel, SysUserRoleRelVo, SysUserRoleRelSaveDto> {
 
 
-
+    /**
+     * 根据用户id返回用户id对应的角色id集合
+     * @param userIds
+     * @return
+     */
     Map<Long, List<Long>> getUserRoleIdMap(List<Long> userIds);
+
+
+    /**
+     * 根据用户id删除关联关系
+     * @param userId
+     */
     void removeByUserId(Long userId);
 }

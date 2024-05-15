@@ -16,5 +16,6 @@ public interface SysRoleMenuRelService extends CrudBaseIService<SysRoleMenuRel, 
 
 
     List<Long> getMenuIdListByRoleIds(List<Long> roleIds);
+
     void removeByRoleId(Long roleId);
 }

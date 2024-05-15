@@ -9,7 +9,9 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.tuling.common.core.exception.ServiceException;
 import com.tuling.common.utils.BeanListUtils;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
+import com.tuling.system.constants.CodeRuleConstants;
 import com.tuling.system.constants.CommonConstants;
+import com.tuling.system.constants.StatusConstants;
 import com.tuling.system.domain.dto.SysRoleSaveDto;
 import com.tuling.system.domain.dto.SysTenantSaveDto;
 import com.tuling.system.domain.dto.SysUserSaveDto;
@@ -66,7 +68,7 @@ public class SysTenantServiceImpl
     public void beforeSave(SysTenantSaveDto dto) {
 
        if (dto.getId()==null|| StrUtil.isBlank(dto.getTenantCode())){
-           dto.setTenantCode(codeRuleService.generateCode(CommonConstants.TENANT_INFO_CODE_PREFIX));
+           dto.setTenantCode(codeRuleService.generateCode(CodeRuleConstants.TENANT_INFO_CODE_PREFIX));
        }
     }
 
@@ -142,6 +144,7 @@ public class SysTenantServiceImpl
         SysUserSaveDto sysUser = new SysUserSaveDto();
 
         sysUser.setNickName(entity.getName() + "管理员");
+        sysUser.setCode(codeRuleService.generateCode(CodeRuleConstants.USER_CODE_PREFIX));
         sysUser.setPassword(BCrypt.hashpw(CommonConstants.DEFAULT_PASSWORD));
         sysUser.setPhoneNum(entity.getPhoneNum());
         //暂为手机号码
@@ -151,6 +154,7 @@ public class SysTenantServiceImpl
          */
         sysUser.setTenantId(entity.getId());
         sysUser.setRoleIds(Collections.singletonList(roleId));
+        sysUser.setStatus(StatusConstants.USER_ENABLE);
 
         userService.saveOrUpdate(sysUser);
 

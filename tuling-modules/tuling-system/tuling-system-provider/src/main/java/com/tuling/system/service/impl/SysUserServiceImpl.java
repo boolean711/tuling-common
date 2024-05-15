@@ -8,10 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 
 import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
+import com.tuling.common.core.constants.PermissionConstants;
 import com.tuling.common.core.exception.ServiceException;
 import com.tuling.common.satoken.utils.LoginHelper;
 import com.tuling.common.utils.BeanListUtils;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
+import com.tuling.system.constants.CodeRuleConstants;
 import com.tuling.system.constants.CommonConstants;
 import com.tuling.system.domain.dto.SysUserSaveDto;
 import com.tuling.system.domain.entity.SysUser;
@@ -19,12 +21,10 @@ import com.tuling.system.domain.entity.SysUserRoleRel;
 import com.tuling.system.domain.vo.SysRoleVo;
 import com.tuling.system.domain.vo.SysUserVo;
 import com.tuling.system.mapper.SysUserMapper;
-import com.tuling.system.service.SysCodeRuleService;
-import com.tuling.system.service.SysRoleService;
-import com.tuling.system.service.SysUserRoleRelService;
-import com.tuling.system.service.SysUserService;
+import com.tuling.system.service.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,25 +47,26 @@ public class SysUserServiceImpl
     @Autowired
     private SysCodeRuleService codeRuleService;
 
+    @Autowired
+    private SysPermissionService permissionService;
+
 
     @Override
     public void beforeSave(SysUserSaveDto dto) {
-        if (dto.getId() != null) {
 
-            dto.setUsername(null);
-            dto.setPassword(null);
-            if (StrUtil.isBlank(dto.getUsername())) {
-                dto.setUsername(dto.getPhoneNum());
-            }
-
-            userRoleRelService.removeByUserId(dto.getId());
-        }else{
-            if (StrUtil.isBlank(dto.getCode())){
-                dto.setCode(codeRuleService.generateCode(CommonConstants.USER_CODE_PREFIX));
-            }
-
+        checkTenant(dto.getTenantId());
+        checkRole(dto.getRoleIds());
+        checkUserNamePassword(dto);
+        if (dto.getId() == null) {
+            dto.setCode(codeRuleService.generateCode(CodeRuleConstants.USER_CODE_PREFIX));
+            dto.setPassword(BCrypt.hashpw(dto.getPassword()));
         }
+
+        userRoleRelService.removeByUserId(dto.getId());
+
+
     }
+
 
     @Override
     public void afterSave(SysUserSaveDto dto, SysUser entity) {
@@ -143,6 +144,53 @@ public class SysUserServiceImpl
 
         this.updateById(sysUser);
 
+
+    }
+
+
+    private void checkRole(List<Long> roleIds) {
+
+        if (!LoginHelper.isAdmin()) {
+            for (Long roleId : roleIds) {
+                if (permissionService.isGivenPermissionByRoleId(roleId, Collections.singletonList(PermissionConstants.ADMIN))) {
+                    throw new ServiceException("异常角色绑定");
+                }
+            }
+        }
+
+
+    }
+
+    private void checkTenant(Long tenantId) {
+        if (!LoginHelper.isAdmin()) {
+            Long currentTenantId = LoginHelper.getCurrentTenantId();
+
+            if (!Objects.equals(tenantId, currentTenantId)) {
+                throw new ServiceException("数据异常，请联系管理员");
+            }
+        }
+    }
+
+    private void checkUserNamePassword(SysUserSaveDto dto) {
+
+        if (dto.getId()==null){
+            if (StrUtil.isBlank(dto.getUsername()) || StrUtil.isBlank(dto.getPassword())) {
+                throw new ServiceException("账号密码为空");
+            }
+        }else{
+            if (StrUtil.isNotBlank(dto.getUsername()) || StrUtil.isNotBlank(dto.getPassword())) {
+                throw new ServiceException("不允许修改账号密码");
+            }
+        }
+
+        LambdaQueryWrapper<SysUser> lqw = new LambdaQueryWrapper<>();
+
+        lqw.eq(SysUser::getUsername, dto.getUsername());
+        lqw.eq(SysUser::getTenantId, dto.getTenantId());
+
+        if (this.count(lqw) > 0) {
+            throw new ServiceException("该账号已存在");
+        }
 
     }
 

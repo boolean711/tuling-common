@@ -38,7 +38,8 @@ public class SysUserVo extends BaseVo {
 
     private Date createTime;
 
-
+    private String createName;
     private Long tenantId;
+
 
 }

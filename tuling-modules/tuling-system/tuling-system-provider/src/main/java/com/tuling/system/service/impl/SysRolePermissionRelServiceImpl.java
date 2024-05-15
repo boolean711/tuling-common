@@ -39,6 +39,22 @@ public class SysRolePermissionRelServiceImpl extends CrudBaseServiceImpl<SysRole
     }
 
     @Override
+    public Map<Long, Long> getPermissionRoleIdMap(List<Long> permissionIds) {
+        LambdaQueryWrapper<SysRolePermissionRel> lqw = new LambdaQueryWrapper<>();
+
+        lqw.in(SysRolePermissionRel::getPermissionId, permissionIds);
+
+        List<SysRolePermissionRel> list = this.list(lqw);
+
+
+        if (CollectionUtils.isNotEmpty(list)) {
+            return list.stream().collect(Collectors.toMap(SysRolePermissionRel::getPermissionId, SysRolePermissionRel::getRoleId));
+        }
+        return Collections.emptyMap();
+
+    }
+
+    @Override
     @Transactional
     public void removeByRoleId(Long roleId) {
 

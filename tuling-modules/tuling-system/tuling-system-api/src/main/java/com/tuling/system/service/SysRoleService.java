@@ -17,6 +17,9 @@ public interface SysRoleService extends CrudBaseIService<SysRole, SysRoleVo, Sys
     List<String> getPermissionCodeByRoleIds(List<Long> roleIds);
 
 
+    Long getRoleIdByPermissionCode(String permissionCode);
+
+
     List<SysRoleVo> getRoleListByUserId(Long userId);
 
 

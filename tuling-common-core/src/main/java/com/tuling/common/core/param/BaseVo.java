@@ -1,6 +1,8 @@
 package com.tuling.common.core.param;
 
 
+import java.util.List;
+
 public abstract class BaseVo {
 
     private Long id;
