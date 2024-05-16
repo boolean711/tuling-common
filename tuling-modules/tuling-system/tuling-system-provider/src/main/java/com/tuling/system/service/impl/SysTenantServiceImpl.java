@@ -21,6 +21,7 @@ import com.tuling.system.domain.entity.SysUser;
 import com.tuling.system.domain.vo.SysPermissionVo;
 import com.tuling.system.domain.vo.SysTenantVo;
 import com.tuling.system.domain.vo.SysUserVo;
+import com.tuling.system.event.AfterSaveTenantEvent;
 import com.tuling.system.mapper.SysTenantMapper;
 import com.tuling.system.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -48,9 +49,6 @@ public class SysTenantServiceImpl
     private SysUserService userService;
     //    @Autowired
 //    private SysTenantRenewRecordService tenantRenewRecordService;
-    @Autowired
-    @Qualifier("jacksonRedisTemplate")
-    private RedisTemplate<String, Object> redisTemplate;
 
 
     @Autowired
@@ -64,6 +62,9 @@ public class SysTenantServiceImpl
     @Autowired
     private SysRoleService roleService;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     @Override
     public void beforeSave(SysTenantSaveDto dto) {
 
@@ -76,9 +77,8 @@ public class SysTenantServiceImpl
     public void afterSave(SysTenantSaveDto dto, SysTenant entity) {
         if (dto.getId() == null) {
             Long roleId = initTenantAdmin(entity);
-
             initLoginUser(roleId, entity);
-
+            eventPublisher.publishEvent(new AfterSaveTenantEvent(this,entity.getId()));
         }
 
 
@@ -149,6 +149,8 @@ public class SysTenantServiceImpl
         sysUser.setPhoneNum(entity.getPhoneNum());
         //暂为手机号码
         sysUser.setUsername(entity.getPhoneNum());
+        sysUser.setGender("男");
+        sysUser.setRemark("管理员角色账号，无法编辑和删除");
         /**
          *   user查询时不拼租户,新增时手动设置租户信息
          */
@@ -190,37 +192,6 @@ public class SysTenantServiceImpl
         return Collections.emptyList();
     }
 
-    @Override
-    @Transactional
-    public boolean resetPassword(Long tenantId) {
-//        if (tenantId == null) {
-//            throw new ServiceException("租户信息为空");
-//        }
-//
-//        LambdaQueryWrapper<SysUser> lqw = new LambdaQueryWrapper<>();
-//
-//        lqw.eq(SysUser::getTenantId, tenantId);
-//
-//        List<SysUser> list = userService.list(lqw);
-//
-//        if (CollectionUtils.isNotEmpty(list)) {
-//
-//            SysUser sysUser = list.get(0);
-//
-//            sysUser.setPassword(BCrypt.hashpw(CommonConstants.DEFAULT_PASSWORD));
-//
-//            userService.updateById(sysUser);
-//
-//            StpUtil.logout(sysUser.getId());
-//            redisTemplate.delete(RedisCommonPrefixKey.INCORRECT_LOGIN_COUNT_PREFIX + sysUser.getPhoneNum());
-//
-//            return true;
-//
-//        }
-//
-
-        throw new ServiceException("该租户未找到登录用户数据");
-    }
 
     @Override
     @Transactional

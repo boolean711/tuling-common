@@ -1,6 +1,7 @@
 package com.tuling.system.service.impl;
 
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.BCrypt;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -15,6 +16,7 @@ import com.tuling.common.utils.BeanListUtils;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
 import com.tuling.system.constants.CodeRuleConstants;
 import com.tuling.system.constants.CommonConstants;
+import com.tuling.system.constants.RedisPrefixKey;
 import com.tuling.system.domain.dto.SysUserSaveDto;
 import com.tuling.system.domain.entity.SysUser;
 import com.tuling.system.domain.entity.SysUserRoleRel;
@@ -24,7 +26,9 @@ import com.tuling.system.mapper.SysUserMapper;
 import com.tuling.system.service.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +53,9 @@ public class SysUserServiceImpl
 
     @Autowired
     private SysPermissionService permissionService;
+    @Autowired
+    @Qualifier("jacksonRedisTemplate")
+    private RedisTemplate<String, Object> redisTemplate;
 
 
     @Override
@@ -108,6 +115,21 @@ public class SysUserServiceImpl
         syncInfo(Collections.singletonList(vo));
     }
 
+    @Override
+    public void beforeRemove(List<SysUser> entityList) {
+        for (SysUser user : entityList) {
+            checkTenant(user.getTenantId());
+            checkRemoveUser(user.getId());
+        }
+    }
+
+    @Override
+    public void afterRemove(List<SysUser> entityList) {
+        for (SysUser user : entityList) {
+            userRoleRelService.removeByUserId(user.getId());
+        }
+
+    }
 
     @Override
     public List<SysUserVo> getUserByUsername(String username, Long tenantId) {
@@ -147,6 +169,46 @@ public class SysUserServiceImpl
 
     }
 
+    @Override
+    public boolean resetPassword(Long id) {
+        SysUser sysUser = this.getById(id);
+
+        checkTenant(sysUser.getTenantId());
+
+        sysUser.setPassword(BCrypt.hashpw(CommonConstants.DEFAULT_PASSWORD));
+
+        this.updateById(sysUser);
+
+        StpUtil.logout(sysUser.getId());
+
+        redisTemplate.delete(String.format(RedisPrefixKey.INCORRECT_LOGIN_COUNT_PREFIX, sysUser.getUsername(), sysUser.getTenantId()));
+
+        return true;
+
+
+    }
+
+    private void checkRemoveUser(Long id) {
+        List<SysRoleVo> roleListByUserId = roleService.getRoleListByUserId(id);
+        boolean isAdmin = LoginHelper.isAdmin();
+
+
+        for (SysRoleVo roleVo : roleListByUserId) {
+            if (!isAdmin) {
+                //非超级管理员不能删除超级管理员和租户管理员
+                if (permissionService.isGivenPermissionByRoleId(roleVo.getId(), Arrays.asList(PermissionConstants.ADMIN, PermissionConstants.TENANT_ADMIN))) {
+                    throw new ServiceException("无法删除管理员用户");
+                }
+            } else {
+                //超级管理员不能删除超级管理员
+                if (permissionService.isGivenPermissionByRoleId(roleVo.getId(), Collections.singletonList(PermissionConstants.ADMIN))) {
+                    throw new ServiceException("无法删除超级管理员用户");
+                }
+            }
+
+        }
+    }
+
 
     private void checkRole(List<Long> roleIds) {
 
@@ -173,11 +235,11 @@ public class SysUserServiceImpl
 
     private void checkUserNamePassword(SysUserSaveDto dto) {
 
-        if (dto.getId()==null){
+        if (dto.getId() == null) {
             if (StrUtil.isBlank(dto.getUsername()) || StrUtil.isBlank(dto.getPassword())) {
                 throw new ServiceException("账号密码为空");
             }
-        }else{
+        } else {
             if (StrUtil.isNotBlank(dto.getUsername()) || StrUtil.isNotBlank(dto.getPassword())) {
                 throw new ServiceException("不允许修改账号密码");
             }

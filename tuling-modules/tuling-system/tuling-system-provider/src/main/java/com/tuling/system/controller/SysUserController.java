@@ -10,10 +10,7 @@ import com.tuling.system.domain.dto.SysUserSaveDto;
 import com.tuling.system.domain.entity.SysUser;
 import com.tuling.system.domain.vo.SysUserVo;
 import com.tuling.system.service.SysUserService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -29,6 +26,10 @@ public class SysUserController extends CrudBaseController<SysUserService, SysUse
         return ApiResponse.success("修改成功").setShowMessage(true);
     }
 
+    @PostMapping("/resetPassword/{id}")
+    public ApiResponse<Boolean> resetPassword(@PathVariable("id") Long id) {
+        return  ApiResponse.success(service.resetPassword(id)).setShowMessage(true).setMessage("重置成功");
+    }
 
 
 }

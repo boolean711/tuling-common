@@ -16,8 +16,6 @@ public interface SysTenantService extends CrudBaseIService<SysTenant, SysTenantV
     List<SysTenantVo> getTenantByUserName(String userName);
 
 
-    boolean resetPassword(Long tenantId);
-
 
     void deductionTextMessageQty(Integer qty, Long tenantId);
 

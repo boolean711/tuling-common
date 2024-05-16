@@ -17,4 +17,6 @@ public interface SysUserService extends CrudBaseIService<SysUser, SysUserVo, Sys
 
 
     void changeUserStatus(Long userId, String status);
+
+    boolean resetPassword(Long id);
 }

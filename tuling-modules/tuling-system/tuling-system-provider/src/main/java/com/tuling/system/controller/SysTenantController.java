@@ -21,10 +21,6 @@ import java.util.List;
 public class SysTenantController extends CrudBaseController<SysTenantService, SysTenant, SysTenantVo, SysTenantSaveDto> {
 
 
-    @PostMapping("/resetPassword/{tenantId}")
-    public ApiResponse<Boolean> resetPassword(@PathVariable("tenantId") Long tenantId) {
-        return  ApiResponse.success(service.resetPassword(tenantId)).setShowMessage(true).setMessage("重置成功");
-    }
 
     @Override
     @SaCheckPermission(value = {PermissionConstants.ADMIN})
