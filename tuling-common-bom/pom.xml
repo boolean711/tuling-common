@@ -67,6 +67,11 @@
                 <artifactId>tuling-system-provider</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>com.tuling</groupId>
+                <artifactId>tuling-auth</artifactId>
+                <version>${revision}</version>
+            </dependency>
         </dependencies>
 
     </dependencyManagement>
