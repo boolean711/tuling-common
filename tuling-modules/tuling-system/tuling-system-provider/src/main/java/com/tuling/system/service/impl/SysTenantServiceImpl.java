@@ -145,7 +145,7 @@ public class SysTenantServiceImpl
 
         sysUser.setNickName(entity.getName() + "管理员");
         sysUser.setCode(codeRuleService.generateCode(CodeRuleConstants.USER_CODE_PREFIX));
-        sysUser.setPassword(BCrypt.hashpw(CommonConstants.DEFAULT_PASSWORD));
+        sysUser.setPassword(CommonConstants.DEFAULT_PASSWORD);
         sysUser.setPhoneNum(entity.getPhoneNum());
         //暂为手机号码
         sysUser.setUsername(entity.getPhoneNum());

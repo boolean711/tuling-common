@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,7 +39,7 @@ public class SysRoleMenuRelServiceImpl extends CrudBaseServiceImpl<SysRoleMenuRe
                 return list.stream().map(SysRoleMenuRel::getMenuId).collect(Collectors.toList());
             }
         }
-        return new ArrayList<>(0);
+        return Collections.emptyList();
     }
 
     @Override
