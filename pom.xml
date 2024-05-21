@@ -26,6 +26,9 @@
         <easy-excel-version>3.1.1</easy-excel-version>
         <tencent-cloud-api-version>3.1.1000</tencent-cloud-api-version>
         <lombok-version>1.18.26</lombok-version>
+        <fastJson2-version>2.0.41</fastJson2-version>
+        <joda-time-version>2.9.5</joda-time-version>
+        <http-client-version>4.5.13</http-client-version>
     </properties>
     <modules>
         <module>tuling-common-utils</module>
@@ -38,6 +41,7 @@
         <module>tuling-common-sms</module>
         <module>tuling-common-satoken</module>
         <module>tuling-modules</module>
+        <module>tuling-common-printer</module>
     </modules>
 
     <dependencyManagement>
@@ -105,26 +109,42 @@
                 <artifactId>tencentcloud-sdk-java</artifactId>
                 <version>${tencent-cloud-api-version}</version>
             </dependency>
+            <!-- https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2 -->
+            <dependency>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
+                <version>${fastJson2-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>${joda-time-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${http-client-version}</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
 
-        <build>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>3.2.1</version>
-                    <executions>
-                        <execution>
-                            <id>attach-sources</id>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

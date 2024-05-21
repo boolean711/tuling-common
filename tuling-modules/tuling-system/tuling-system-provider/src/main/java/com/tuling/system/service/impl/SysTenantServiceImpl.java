@@ -1,11 +1,8 @@
 package com.tuling.system.service.impl;
 
-import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.digest.BCrypt;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-
+import com.tuling.common.core.constants.PermissionConstants;
 import com.tuling.common.core.exception.ServiceException;
 import com.tuling.common.utils.BeanListUtils;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
@@ -17,7 +14,6 @@ import com.tuling.system.domain.dto.SysTenantSaveDto;
 import com.tuling.system.domain.dto.SysUserSaveDto;
 import com.tuling.system.domain.entity.SysTenant;
 import com.tuling.system.domain.entity.SysTenantPackage;
-import com.tuling.system.domain.entity.SysUser;
 import com.tuling.system.domain.vo.SysPermissionVo;
 import com.tuling.system.domain.vo.SysTenantVo;
 import com.tuling.system.domain.vo.SysUserVo;
@@ -26,9 +22,7 @@ import com.tuling.system.mapper.SysTenantMapper;
 import com.tuling.system.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,9 +41,6 @@ public class SysTenantServiceImpl
 
     @Autowired
     private SysUserService userService;
-    //    @Autowired
-//    private SysTenantRenewRecordService tenantRenewRecordService;
-
 
     @Autowired
     private SysCodeRuleService codeRuleService;
@@ -68,9 +59,9 @@ public class SysTenantServiceImpl
     @Override
     public void beforeSave(SysTenantSaveDto dto) {
 
-       if (dto.getId()==null|| StrUtil.isBlank(dto.getTenantCode())){
-           dto.setTenantCode(codeRuleService.generateCode(CodeRuleConstants.TENANT_INFO_CODE_PREFIX));
-       }
+        if (dto.getId() == null || StrUtil.isBlank(dto.getTenantCode())) {
+            dto.setTenantCode(codeRuleService.generateCode(CodeRuleConstants.TENANT_INFO_CODE_PREFIX));
+        }
     }
 
     @Override
@@ -78,16 +69,8 @@ public class SysTenantServiceImpl
         if (dto.getId() == null) {
             Long roleId = initTenantAdmin(entity);
             initLoginUser(roleId, entity);
-            eventPublisher.publishEvent(new AfterSaveTenantEvent(this,entity.getId()));
+            eventPublisher.publishEvent(new AfterSaveTenantEvent(this, entity.getId()));
         }
-
-
-//        if (dto.getRenewMonthNum() != null && dto.getRenewMonthNum() > 0) {
-//            insertRecord(dto, entity.getId(), TypeConstants.RECORD_TYPE_RENEW, "月");
-//        }
-//        if (dto.getTextMessageQty() != null && dto.getTextMessageQty() > 0) {
-//            insertRecord(dto, entity.getId(), TypeConstants.RECORD_TYPE_MESSAGE, "条");
-//        }
 
 
     }
@@ -103,7 +86,7 @@ public class SysTenantServiceImpl
 
         String menuIds = tenantPackage.getMenuIds();
 
-        SysPermissionVo permissionByCode = permissionService.getPermissionByCode("system::tenant");
+        SysPermissionVo permissionByCode = permissionService.getPermissionByCode(PermissionConstants.ADMIN);
 
         SysRoleSaveDto roleSaveDto = new SysRoleSaveDto();
 
@@ -116,29 +99,6 @@ public class SysTenantServiceImpl
         return roleService.saveOrUpdate(roleSaveDto);
 
     }
-
-
-//    private void insertRecord(SysTenantSaveDto dto, Long id, Integer type, String unit) {
-//
-//
-//        SysTenantCostRecord tenantRenewRecord = new SysTenantCostRecord();
-//
-//        tenantRenewRecord.setName(dto.getName());
-//        tenantRenewRecord.setTenantCode(dto.getTenantCode());
-//        tenantRenewRecord.setRenewUnit(unit);
-//        if (type.equals(TypeConstants.RECORD_TYPE_RENEW)) {
-//            tenantRenewRecord.setRenewNum(dto.getRenewMonthNum());
-//        } else if (type.equals(TypeConstants.RECORD_TYPE_MESSAGE)) {
-//            tenantRenewRecord.setRenewNum(dto.getTextMessageQty());
-//        }
-//
-//        tenantRenewRecord.setPhoneNum(dto.getPhoneNum());
-//        tenantRenewRecord.setType(type);
-//        tenantRenewRecord.setTenantId(id);
-//        tenantRenewRecordService.saveOrUpdate(tenantRenewRecord);
-//
-//
-//    }
 
     private void initLoginUser(Long roleId, SysTenant entity) {
         SysUserSaveDto sysUser = new SysUserSaveDto();
@@ -167,7 +127,7 @@ public class SysTenantServiceImpl
     @Override
     public List<SysTenantVo> getTenantByUserName(String userName) {
 
-        List<SysUserVo> userByUsername = userService.getUserByUsername(userName,null);
+        List<SysUserVo> userByUsername = userService.getUserByUsername(userName, null);
 
         if (CollectionUtils.isNotEmpty(userByUsername)) {
             List<Long> tenantIds = userByUsername.stream().map(SysUserVo::getTenantId).collect(Collectors.toList());
@@ -175,6 +135,15 @@ public class SysTenantServiceImpl
             List<SysTenant> sysTenants = this.listByIds(tenantIds);
 
             List<SysTenantVo> tenantVoList = BeanListUtils.copyList(sysTenants, SysTenantVo.class);
+            for (SysTenantVo tenantVo : tenantVoList) {
+                //脱敏
+                tenantVo.setPhoneNum(null);
+                tenantVo.setAddress(null);
+                tenantVo.setIconUrl(null);
+                tenantVo.setOrderNum(null);
+                tenantVo.setPackageId(null);
+                tenantVo.setValidTime(null);
+            }
 
             if (tenantIds.contains(-1L)) {
                 SysTenantVo admin = new SysTenantVo();

@@ -100,7 +100,7 @@ public abstract class CrudBaseServiceImpl
 
         beforeSave(dto);
 
-        E entityInstance = createEntityInstance();
+        E entityInstance = ReflectUtil.newInstance(getEntityClass());
         BeanUtils.copyProperties(dto, entityInstance);
 
         saveOrUpdate(entityInstance);
@@ -115,7 +115,7 @@ public abstract class CrudBaseServiceImpl
         E e = this.baseMapper.selectById(id);
 
 
-        VO voInstance = createVOInstance();
+        VO voInstance = ReflectUtil.newInstance(getVoClass());
 
         if (e != null) {
             BeanUtils.copyProperties(e, voInstance);
@@ -140,15 +140,13 @@ public abstract class CrudBaseServiceImpl
 
 
     @Override
-    public <T extends BaseTreeVo> List<T> buildTree(Class<T > prototypeClass, List<VO> records ) {
+    public <T extends BaseTreeVo> List<T> buildTree(Class<T> prototypeClass, List<VO> records) {
 
 
         if (CollectionUtil.isNotEmpty(records) && isTreeNode(records.get(0))) {
-            List<TreeNode> treeNodes = records.stream()
-                    .map(record -> (TreeNode) record)
-                    .collect(Collectors.toList());
 
-            treeNodes = buildTree(treeNodes);
+
+            List<TreeNode> treeNodes = buildTree(records);
 
             return treeNodes.stream().map(item -> BaseTreeVo.createInstance(prototypeClass, item)).collect(Collectors.toList());
 
@@ -169,24 +167,6 @@ public abstract class CrudBaseServiceImpl
 
     }
 
-    private E createEntityInstance() {
-        try {
-            return getEntityClass().getDeclaredConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
-                InvocationTargetException e) {
-            throw new RuntimeException("Failed to create entity instance", e);
-        }
-    }
-
-    private VO createVOInstance() {
-        try {
-
-            return getVoClass().getDeclaredConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
-                InvocationTargetException e) {
-            throw new RuntimeException("Failed to create entity instance", e);
-        }
-    }
 
     private Class<VO> getVoClass() {
         ParameterizedType genericSuperclass = (ParameterizedType) getClass().getGenericSuperclass();
@@ -220,9 +200,9 @@ public abstract class CrudBaseServiceImpl
     }
 
 
-    private List<TreeNode> buildTree(List<TreeNode> voList) {
+    private List<TreeNode> buildTree(List<?> voList) {
 
-        Class<? extends TreeNode> voClass = voList.get(0).getClass();
+        Class<?> voClass = voList.get(0).getClass();
 
 
         Field parentIdField = ReflectUtil.getField(voClass, "parentId");
@@ -235,38 +215,40 @@ public abstract class CrudBaseServiceImpl
             throw new ServiceException("Vo class must have a 'children' field.");
         }
 
-        // 创建一个Map，用于根据id快速查找节点
+
         Map<Long, TreeNode> nodeMap = new HashMap<>();
 
-        // 遍历列表，将每个节点放入Map中
-        for (TreeNode vo : voList) {
-            // 使用反射设置id字段的值
+
+        for (Object vo : voList) {
+
+            TreeNode treeNode= (TreeNode) vo;
+
             parentIdField.setAccessible(true);
-            nodeMap.put(vo.getId(), vo);
+            nodeMap.put(treeNode.getId(), treeNode);
         }
 
-        // 创建根节点列表
+
         List<TreeNode> rootNodes = new ArrayList<>();
 
-        // 再次遍历列表，根据parentId将节点添加到对应的父节点下
-        for (TreeNode vo : voList) {
+
+        for (Object vo : voList) {
+            TreeNode treeNode= (TreeNode) vo;
             try {
-                // 使用反射获取parentId字段的值
+
                 parentIdField.setAccessible(true);
                 Long parentId = (Long) parentIdField.get(vo);
                 if (parentId == 0L) {
                     // 如果parentId为0，说明是根节点
-                    rootNodes.add(vo);
+                    rootNodes.add(treeNode);
                 } else {
-                    // 根据parentId找到父节点
+
                     TreeNode parent = nodeMap.get(parentId);
                     if (parent != null) {
-                        // 使用反射获取children字段的值
                         childrenField.setAccessible(true);
                         List<TreeNode> childrenList = (List<TreeNode>) childrenField.get(parent);
                         if (childrenList != null) {
                             // 将当前节点添加到父节点的children列表中
-                            childrenList.add(vo);
+                            childrenList.add(treeNode);
                         }
                     }
                 }
@@ -280,7 +262,7 @@ public abstract class CrudBaseServiceImpl
     }
 
 
-    private  boolean isTreeNode(Object obj) {
+    private boolean isTreeNode(Object obj) {
 
         Class<?> clazz = obj.getClass();
         for (Class<?> iface : clazz.getInterfaces()) {

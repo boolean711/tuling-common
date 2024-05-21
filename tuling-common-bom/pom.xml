@@ -72,6 +72,11 @@
                 <artifactId>tuling-auth</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>com.tuling</groupId>
+                <artifactId>tuling-common-printer</artifactId>
+                <version>${revision}</version>
+            </dependency>
         </dependencies>
 
     </dependencyManagement>
