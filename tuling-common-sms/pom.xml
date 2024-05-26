@@ -24,7 +24,10 @@
         <dependency>
             <groupId>com.tuling</groupId>
             <artifactId>tuling-common-utils</artifactId>
-            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.tuling</groupId>
+            <artifactId>tuling-common-redis</artifactId>
         </dependency>
 
     </dependencies>

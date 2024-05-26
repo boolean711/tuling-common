@@ -1,8 +1,10 @@
 package com.tuling.common.web.config;
 
+import cn.dev33.satoken.fun.SaFunction;
 import cn.dev33.satoken.interceptor.SaInterceptor;
-import com.tuling.common.satoken.handler.ISaTokenInterceptorHandler;
-import com.tuling.common.utils.SpringUtils;
+import cn.dev33.satoken.router.SaRouter;
+import cn.dev33.satoken.router.SaRouterStaff;
+import com.tuling.common.satoken.processor.SaTokenInterceptorArgsHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -14,13 +16,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Configuration
 public class SpringMvcConfig implements WebMvcConfigurer {
 
 
-    @Autowired(required = false)
-    private  ISaTokenInterceptorHandler saTokenInterceptorHandler;
+    @Autowired
+    private SaTokenInterceptorArgsHolder handlerHolder;
 
     @Override
     public void addFormatters(FormatterRegistry registry) {
@@ -58,13 +62,22 @@ public class SpringMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // 注册 Sa-Token 拦截器，定义详细认证规则
-        if (saTokenInterceptorHandler!=null){
-            registry.addInterceptor(new SaInterceptor(saTokenInterceptorHandler)).addPathPatterns("/**");
-            // 注册 Sa-Token 拦截器，打开注解式鉴权功能
-            registry.addInterceptor(new SaInterceptor()).addPathPatterns("/**");
-        }
 
+        registry.addInterceptor(new SaInterceptor(r -> {
+            SaRouterStaff saRouterStaff = SaRouter.match(handlerHolder.getMatchArgs()).notMatch(handlerHolder.getNotMatchAras());
+
+            Map<Integer, List<SaFunction>> checkFunction = handlerHolder.getCheckFunction();
+
+            for (Map.Entry<Integer, List<SaFunction>> entry : checkFunction.entrySet()) {
+                List<SaFunction> saFunctionList = entry.getValue();
+                for (SaFunction saFunction : saFunctionList) {
+                    saRouterStaff.check(saFunction);
+                }
+
+            }
+        })).addPathPatterns("/**");
+        // 注册 Sa-Token 拦截器，打开注解式鉴权功能
+        registry.addInterceptor(new SaInterceptor()).addPathPatterns("/**");
     }
 
 
