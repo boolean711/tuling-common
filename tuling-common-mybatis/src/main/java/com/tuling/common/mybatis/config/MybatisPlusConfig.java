@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.baomidou.mybatisplus.core.incrementer.DefaultIdentifierGenerator;
 import com.baomidou.mybatisplus.core.incrementer.IdentifierGenerator;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
@@ -45,6 +46,8 @@ public class MybatisPlusConfig {
         interceptor.addInnerInterceptor(optimisticLockerInnerInterceptor());
         // 分页插件
         interceptor.addInnerInterceptor(paginationInnerInterceptor());
+        //禁止全表更新插件
+        interceptor.addInnerInterceptor(blockAttackInnerInterceptor());
         return interceptor;
     }
 
@@ -73,6 +76,13 @@ public class MybatisPlusConfig {
         return new OptimisticLockerInnerInterceptor();
     }
 
+    /**
+     * 禁止全表更新插件
+     * @return
+     */
+    public BlockAttackInnerInterceptor blockAttackInnerInterceptor() {
+      return  new BlockAttackInnerInterceptor();
+    }
     /**
      * 元对象字段填充控制器
      */
