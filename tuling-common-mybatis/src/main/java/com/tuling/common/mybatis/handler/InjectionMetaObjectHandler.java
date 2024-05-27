@@ -38,6 +38,9 @@ public class InjectionMetaObjectHandler implements MetaObjectHandler {
 
         LoginUserDetails loginUser = LoginHelper.getCurrentLoginUser();
         log.error("TokenHolderManager.getToken()：{}", SaTokenHolderManager.getToken());
+        if (SaTokenHolderManager.getToken()==null){
+            printCurrentStackTrace();
+        }
         if (loginUser == null) {
             throw new MyBatisSystemException(new Exception("未知用户，插入元数据失败，请联系管理员"));
         }
@@ -108,6 +111,9 @@ public class InjectionMetaObjectHandler implements MetaObjectHandler {
 
         LoginUserDetails loginUser = LoginHelper.getCurrentLoginUser();
         log.error("TokenHolderManager.getToken()：{}", SaTokenHolderManager.getToken());
+        if (SaTokenHolderManager.getToken()==null){
+            printCurrentStackTrace();
+        }
         if (loginUser == null) {
             throw new MyBatisSystemException(new Exception("未知用户，插入元数据失败，请联系管理员"));
         }
@@ -116,6 +122,11 @@ public class InjectionMetaObjectHandler implements MetaObjectHandler {
 
 
     }
-
+    private  void printCurrentStackTrace() {
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        for (StackTraceElement element : stackTraceElements) {
+            log.info("element:{}",element.toString());
+        }
+    }
 
 }
