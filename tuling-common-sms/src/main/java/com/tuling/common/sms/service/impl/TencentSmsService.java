@@ -37,11 +37,7 @@ public class TencentSmsService implements SmsService {
     @Qualifier("jacksonRedisTemplate")
     private RedisTemplate<String, Object> redisTemplate;
 
-    private static  final int SEND_MAX_TIMES_ONE_DAY=5;
 
-    private static  String PHONE_NUM_TIMES_REDIS_PREFIX="phoneNumTimes:%s";
-
-    private static  String PHONE_NUM_CODE_REDIS_PREFIX="phoneNumCode:%s";
 
     private SmsClient client;
 
@@ -82,56 +78,7 @@ public class TencentSmsService implements SmsService {
         }
     }
 
-    @Override
-    public String sendPhoneNumCode(String phoneNum, String code, String templateId) {
-        // Redis key for the phone number
-        String redisKey = String.format(PHONE_NUM_TIMES_REDIS_PREFIX, phoneNum);
 
-        // Check how many times the code has been sent today
-        Integer sendCount = (Integer) redisTemplate.opsForValue().get(redisKey);
-        if (sendCount == null) {
-            sendCount = 0;
-        }
-
-        if (sendCount >= SEND_MAX_TIMES_ONE_DAY) {
-            throw new ServiceException("当天发送次数过多");
-        }
-
-        // Send the SMS code
-        String result = this.send(new String[]{phoneNum}, new String[]{code,"1"}, templateId);
-
-        // Increment the count in Redis
-        sendCount++;
-        Date now = DateUtil.date();
-        Date endOfDay = DateUtil.endOfDay(now);
-        long secondsUntilEndOfDay = DateUtil.between(now, endOfDay, DateUnit.SECOND);
-        redisTemplate.opsForValue().set(redisKey, sendCount, secondsUntilEndOfDay, TimeUnit.SECONDS);
-
-        // Store the verification code with a 1-minute expiry
-        String codeKey = String.format(PHONE_NUM_CODE_REDIS_PREFIX,phoneNum);
-        redisTemplate.opsForValue().set(codeKey, code, 1, TimeUnit.MINUTES);
-
-        return result;
-    }
-
-    @Override
-    public boolean checkPhoneNumCode(String phoneNum, String code) {
-        // Redis key for the verification code
-        String codeKey = String.format(PHONE_NUM_CODE_REDIS_PREFIX, phoneNum);
-
-        // Get the stored code from Redis
-        String storedCode = (String) redisTemplate.opsForValue().get(codeKey);
-
-        // Verify the code
-        if (storedCode != null && storedCode.equals(code)) {
-            // If the code matches, delete it from Redis to prevent reuse
-            redisTemplate.delete(codeKey);
-            return true;
-        }
-
-        // If the code does not match or is not found, return false
-        return false;
-    }
 
 
 
