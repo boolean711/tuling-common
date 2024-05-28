@@ -14,6 +14,7 @@ import com.tuling.system.mapper.SysPermissionMapper;
 import com.tuling.system.service.SysPermissionService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,7 +36,7 @@ public class SysPermissionController
     @Override
     @PostMapping("/removeByIds")
     @OperationLog(methodName = "permissionRemoveByIds")
-    public ApiResponse<Boolean> removeByIds(List<Long> ids) {
+    public ApiResponse<Boolean> removeByIds(@RequestBody List<Long> ids) {
         return super.removeByIds(ids);
     }
 }

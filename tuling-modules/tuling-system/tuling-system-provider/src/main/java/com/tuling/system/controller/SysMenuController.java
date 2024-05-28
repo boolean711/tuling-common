@@ -61,7 +61,7 @@ public class SysMenuController extends CrudBaseController<SysMenuService, SysMen
     @Override
     @SaCheckPermission(PermissionConstants.ADMIN)
     @OperationLog(methodName = "menuRemoveByIds")
-    public ApiResponse<Boolean> removeByIds(List<Long> ids) {
+    public ApiResponse<Boolean> removeByIds(@RequestBody List<Long> ids) {
         return super.removeByIds(ids);
     }
 }

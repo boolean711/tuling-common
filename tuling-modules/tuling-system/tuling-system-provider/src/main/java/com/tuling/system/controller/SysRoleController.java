@@ -36,7 +36,7 @@ public class SysRoleController extends CrudBaseController<SysRoleService, SysRol
     @Override
     @PostMapping("/removeByIds")
     @OperationLog(methodName = "roleRemoveByIds")
-    public ApiResponse<Boolean> removeByIds(List<Long> ids) {
+    public ApiResponse<Boolean> removeByIds(@RequestBody List<Long> ids) {
         return super.removeByIds(ids);
     }
 }
