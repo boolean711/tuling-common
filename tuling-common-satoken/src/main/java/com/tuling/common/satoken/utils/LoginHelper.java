@@ -145,7 +145,7 @@ public class LoginHelper {
             return currentLoginUser.getRoleIdList();
         }
 
-        return new ArrayList<>(0);
+        return Collections.emptyList();
     }
 
     /**
@@ -160,7 +160,7 @@ public class LoginHelper {
             return currentLoginUser.getAuthorities();
         }
 
-        return new ArrayList<>(0);
+        return Collections.emptyList();
     }
 
     private static Object getExtra(String key) {
@@ -201,7 +201,11 @@ public class LoginHelper {
 
     public static Long getCurrentTenantId() {
 
+        if (isAdmin()){
+            return -1L;
+        }
         LoginUserDetails loginUser = getCurrentLoginUser();
+
 
         if (loginUser != null) {
             return loginUser.getTenantId();

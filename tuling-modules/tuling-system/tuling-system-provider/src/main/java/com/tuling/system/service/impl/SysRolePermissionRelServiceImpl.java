@@ -56,11 +56,11 @@ public class SysRolePermissionRelServiceImpl extends CrudBaseServiceImpl<SysRole
 
     @Override
     @Transactional
-    public void removeByRoleId(Long roleId) {
+    public void removeByRoleId( List<Long> roleIds) {
 
         LambdaQueryWrapper<SysRolePermissionRel> lqw = new LambdaQueryWrapper<>();
 
-        lqw.eq(SysRolePermissionRel::getRoleId, roleId);
+        lqw.in(SysRolePermissionRel::getRoleId, roleIds);
 
         this.remove(lqw);
     }

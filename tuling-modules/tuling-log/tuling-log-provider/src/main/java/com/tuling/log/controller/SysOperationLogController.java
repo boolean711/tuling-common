@@ -1,6 +1,7 @@
 package com.tuling.log.controller;
 
 
+import com.tuling.common.web.controller.CrudBaseController;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
 import com.tuling.log.domain.dto.SysOperationLogSaveDto;
 import com.tuling.log.domain.entity.SysOperationLog;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/log")
-public class SysOperationLogController extends CrudBaseServiceImpl<SysOperationLog, SysOperationLogVo, SysOperationLogSaveDto, SysOperationLogMapper> implements SysOperationLogService {
+public class SysOperationLogController extends CrudBaseController<SysOperationLogService,SysOperationLog, SysOperationLogVo, SysOperationLogSaveDto> {
 
 
 

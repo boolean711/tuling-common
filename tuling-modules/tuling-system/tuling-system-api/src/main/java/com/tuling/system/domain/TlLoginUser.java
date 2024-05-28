@@ -66,7 +66,7 @@ public class TlLoginUser implements LoginUserDetails {
     @Override
     @JsonIgnore
     public String getNickName() {
-        return  sysUserVo.getNickName();
+        return sysUserVo.getNickName();
     }
 
     @Override
@@ -107,8 +107,12 @@ public class TlLoginUser implements LoginUserDetails {
     @Override
     @JsonIgnore
     public Long getTenantId() {
+
         SysTenantVo tenantVo = sysUserVo.getTenantVo();
-        return tenantVo.getId();
+        if (tenantVo != null) {
+            return tenantVo.getId();
+        }
+        return null;
     }
 
     @Override

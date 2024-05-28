@@ -44,11 +44,11 @@ public class SysRoleMenuRelServiceImpl extends CrudBaseServiceImpl<SysRoleMenuRe
 
     @Override
     @Transactional
-    public void removeByRoleId(Long roleId) {
+    public void removeByRoleId(List<Long> roleIds) {
 
         LambdaQueryWrapper<SysRoleMenuRel> lqw = new LambdaQueryWrapper<>();
 
-        lqw.eq(SysRoleMenuRel::getRoleId, roleId);
+        lqw.in(SysRoleMenuRel::getRoleId, roleIds);
 
         this.remove(lqw);
     }

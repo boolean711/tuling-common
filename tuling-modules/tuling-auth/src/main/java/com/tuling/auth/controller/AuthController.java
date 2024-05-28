@@ -15,6 +15,7 @@ import com.tuling.auth.domain.vo.UserLoginVo;
 import com.tuling.auth.service.LoginService;
 import com.tuling.common.core.exception.ServiceException;
 import com.tuling.common.core.param.ApiResponse;
+import com.tuling.common.satoken.param.LoginUserDetails;
 import com.tuling.common.satoken.utils.LoginHelper;
 import com.tuling.log.annotations.OperationLog;
 import com.tuling.system.domain.TlLoginUser;
@@ -54,7 +55,7 @@ public class AuthController {
     private String sceneId="1gmllrc6";
 
     @PostMapping("/doLogin")
-    @OperationLog(methodName = "doLogin")
+    @OperationLog(methodName = "doLogin",isLogin = true)
     public ApiResponse<UserLoginVo> doLogin(@RequestBody @Validated UserLoginDto loginDto) {
 
         UserLoginVo vo = loginService.loginByPassword(loginDto);
@@ -103,7 +104,11 @@ public class AuthController {
     @RequestMapping("/logout")
     @OperationLog(methodName = "logout")
     public ApiResponse<Void> logout() {
+        LoginUserDetails loginUser = LoginHelper.getCurrentLoginUser();
+
         StpUtil.logout();
+        //设置临时用户,记录日志使用
+        LoginHelper.storageSetLoginUser(loginUser);
         return ApiResponse.successNoData();
     }
 

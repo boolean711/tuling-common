@@ -17,8 +17,6 @@ import java.util.Date;
 /**
  * MP注入处理器
  *
- * @author Lion Li
- * @date 2021/4/25
  */
 @Slf4j
 public class InjectionMetaObjectHandler implements MetaObjectHandler {
@@ -33,6 +31,10 @@ public class InjectionMetaObjectHandler implements MetaObjectHandler {
     @Override
     public void insertFill(MetaObject metaObject) {
 
+        if (!(boolean) getFieldValByName("needInsertMetaData", metaObject)){
+            log.info("无需自动填充=============");
+            return;
+        }
 
         log.info("新增开始自动填充=========");
 

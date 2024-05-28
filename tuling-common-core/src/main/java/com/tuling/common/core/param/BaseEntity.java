@@ -28,4 +28,7 @@ public class BaseEntity {
     private Date updateTime;
     private Long tenantId;
 
+    @TableField(exist = false)
+    private boolean needInsertMetaData=true;
+
 }

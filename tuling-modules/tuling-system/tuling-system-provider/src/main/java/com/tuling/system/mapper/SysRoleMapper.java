@@ -17,4 +17,13 @@ public interface SysRoleMapper extends CrudBaseMapper<SysRole> {
 
     @InterceptorIgnore(tenantLine = "true")
     List<SysRoleVo> listByIdsIgnoreTenant(@Param(("roleIds")) List<Long> roleIds);
+
+    /**
+     * 根据租户套餐id查出对应租户管理员的角色id
+     * @param packageId
+     * @return
+     */
+    @InterceptorIgnore(tenantLine = "true")
+    List<Long> selectTenantAdminRoleIdByPackageId(@Param("packageId") Long packageId);
+
 }

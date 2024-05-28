@@ -53,8 +53,8 @@ public class SysRoleServiceImpl extends CrudBaseServiceImpl<SysRole, SysRoleVo, 
             if (permissionService.isGivenPermissionByRoleId(dto.getId(), Arrays.asList(PermissionConstants.TENANT_ADMIN,PermissionConstants.ADMIN))) {
                 throw new ServiceException("管理员角色无法修改");
             }
-            roleMenuRelService.removeByRoleId(dto.getId());
-            rolePermissionRelService.removeByRoleId(dto.getId());
+            roleMenuRelService.removeByRoleId(Collections.singletonList(dto.getId()));
+            rolePermissionRelService.removeByRoleId(Collections.singletonList(dto.getId()));
         }
     }
 
@@ -105,11 +105,11 @@ public class SysRoleServiceImpl extends CrudBaseServiceImpl<SysRole, SysRoleVo, 
     @Override
     public void afterRemove(List<SysRole> entityList) {
 
-        for (SysRole role : entityList) {
+        List<Long> collect = entityList.stream().map(SysRole::getId).collect(Collectors.toList());
 
-            roleMenuRelService.removeByRoleId(role.getId());
-            rolePermissionRelService.removeByRoleId(role.getId());
-        }
+        roleMenuRelService.removeByRoleId(collect);
+        rolePermissionRelService.removeByRoleId(collect);
+
 
     }
     @Override

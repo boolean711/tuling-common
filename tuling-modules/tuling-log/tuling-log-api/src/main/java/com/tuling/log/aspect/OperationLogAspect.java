@@ -1,5 +1,7 @@
 package com.tuling.log.aspect;
 
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.tuling.common.satoken.param.LoginUserDetails;
 import com.tuling.common.satoken.utils.LoginHelper;
@@ -55,12 +57,35 @@ public class OperationLogAspect {
         try {
             result = joinPoint.proceed();
             log.setOperationResult(JSONUtil.toJsonStr(result));
+            log.setTenantId(LoginHelper.getCurrentTenantId());
         } catch (Exception e) {
             // 记录异常日志
             log.setOperationResult("Exception: " + e.getMessage());
             throw e;
         } finally {
-            LoginUserDetails loginUser = LoginHelper.getCurrentLoginUser();
+            //登录接口特殊处理，因为可以没有登录成功，获取不到人员信息
+            LoginUserDetails loginUser = null;
+            if (!operationLogAnnotation.isLogin()) {
+                loginUser = LoginHelper.getCurrentLoginUser();
+            } else {
+                JSONObject jsonObject = JSONUtil.parseObj(log.getOperationResult());
+
+                JSONObject data = jsonObject.getJSONObject("data");
+                String token = data.get("token", String.class);
+
+
+                if (StrUtil.isNotBlank(token)) {
+                    loginUser = LoginHelper.getCurrentLoginUser();
+                }else{
+                    log.setNeedInsertMetaData(false);
+                    log.setCreateId(null);
+                    log.setCreateTime(new Date());
+                    log.setUpdateTime(new Date());
+                    log.setOperator("未知用户，登录失败");
+
+                }
+            }
+
             if (loginUser != null) {
                 log.setOperator(loginUser.getNickName());
             }

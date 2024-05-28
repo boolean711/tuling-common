@@ -3,11 +3,27 @@
 <mapper namespace="com.tuling.system.mapper.SysRoleMapper">
 
 
-    <select id="listByIdsIgnoreTenant" resultType="com.tuling.system.domain.vo.SysRoleVo" parameterType="java.util.List">
+    <select id="listByIdsIgnoreTenant" resultType="com.tuling.system.domain.vo.SysRoleVo"
+            parameterType="java.util.List">
         SELECT * FROM sys_role
         WHERE id IN
         <foreach collection="roleIds" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
+    </select>
+    <select id="selectTenantAdminRoleIdByPackageId" resultType="java.lang.Long">
+
+        select role_id
+        from sys_role role
+                 left join sys_role_permission_rel role_permission_rel on role_permission_rel.role_id = role.id
+                 left join sys_permission permission on role_permission_rel.permission_id = permission.id
+        where permission.permission_code = 'system::tenant'
+          and role.delete_flag = false
+          and role.tenant_id in (select tenant.id as tenant_id
+                                 from sys_tenant tenant
+                                          left join sys_tenant_package package on tenant.package_id = package.id
+                                 where package.id = #{packageId})
+
+
     </select>
 </mapper>

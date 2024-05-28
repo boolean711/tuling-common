@@ -19,7 +19,7 @@ public interface SysRolePermissionRelService extends CrudBaseIService<SysRolePer
     Map<Long,Long> getPermissionRoleIdMap(List<Long> permissionIds);
 
 
-    void removeByRoleId(Long roleId);
+    void removeByRoleId(List<Long> roleIds);
 
 
 

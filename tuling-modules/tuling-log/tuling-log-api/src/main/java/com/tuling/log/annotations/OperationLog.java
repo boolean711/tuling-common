@@ -10,4 +10,7 @@ import java.lang.annotation.Target;
 public @interface OperationLog {
     String methodName() default ""; // 操作方法名称
 
+
+    boolean isLogin() default false;//是否登录接口操作
+
 }
