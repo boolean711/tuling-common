@@ -9,6 +9,7 @@ import com.tuling.common.core.param.ApiResponse;
 import com.tuling.common.mybatis.param.ExpressionQueryDto;
 import com.tuling.common.web.controller.CrudBaseController;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
+import com.tuling.log.annotations.OperationLog;
 import com.tuling.system.domain.dto.SysRoleSaveDto;
 import com.tuling.system.domain.entity.SysRole;
 import com.tuling.system.domain.vo.SysRoleVo;
@@ -25,6 +26,17 @@ import java.util.List;
 @RequestMapping("/system/role")
 @SaCheckPermission(value = {PermissionConstants.ADMIN, PermissionConstants.TENANT_ADMIN}, mode = SaMode.OR)
 public class SysRoleController extends CrudBaseController<SysRoleService, SysRole, SysRoleVo, SysRoleSaveDto> {
+    @Override
+    @PostMapping("/saveOrUpdate")
+    @OperationLog(methodName = "roleSaveOrUpdate")
+    public ApiResponse<Long> saveOrUpdate(SysRoleSaveDto dto) {
+        return super.saveOrUpdate(dto);
+    }
 
-
+    @Override
+    @PostMapping("/removeByIds")
+    @OperationLog(methodName = "roleRemoveByIds")
+    public ApiResponse<Boolean> removeByIds(List<Long> ids) {
+        return super.removeByIds(ids);
+    }
 }

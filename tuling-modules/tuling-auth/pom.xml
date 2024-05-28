@@ -20,6 +20,11 @@
             <groupId>com.tuling</groupId>
             <artifactId>tuling-system-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.tuling</groupId>
+            <artifactId>tuling-log-api</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

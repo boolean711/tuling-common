@@ -8,6 +8,7 @@ import cn.dev33.satoken.annotation.SaMode;
 import com.tuling.common.core.constants.PermissionConstants;
 import com.tuling.common.core.param.ApiResponse;
 import com.tuling.common.web.controller.CrudBaseController;
+import com.tuling.log.annotations.OperationLog;
 import com.tuling.system.domain.dto.SysTenantSaveDto;
 import com.tuling.system.domain.entity.SysTenant;
 import com.tuling.system.domain.vo.SysTenantVo;
@@ -25,6 +26,7 @@ public class SysTenantController extends CrudBaseController<SysTenantService, Sy
     @Override
     @SaCheckPermission(value = {PermissionConstants.ADMIN})
     @PostMapping("/saveOrUpdate")
+    @OperationLog(methodName = "tenantSaveOrUpdate")
     public ApiResponse<Long> saveOrUpdate(@RequestBody SysTenantSaveDto dto) {
         return super.saveOrUpdate(dto);
     }
@@ -32,6 +34,7 @@ public class SysTenantController extends CrudBaseController<SysTenantService, Sy
     @Override
     @SaCheckPermission(value = {PermissionConstants.ADMIN})
     @PostMapping("/removeByIds")
+    @OperationLog(methodName = "tenantRemoveByIds")
     public ApiResponse<Boolean> removeByIds(@RequestBody List<Long> ids) {
         return super.removeByIds(ids);
     }

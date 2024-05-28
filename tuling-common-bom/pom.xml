@@ -77,6 +77,21 @@
                 <artifactId>tuling-common-printer</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>com.tuling</groupId>
+                <artifactId>tuling-wxmq</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.tuling</groupId>
+                <artifactId>tuling-log-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.tuling</groupId>
+                <artifactId>tuling-log-provider</artifactId>
+                <version>${revision}</version>
+            </dependency>
         </dependencies>
 
     </dependencyManagement>

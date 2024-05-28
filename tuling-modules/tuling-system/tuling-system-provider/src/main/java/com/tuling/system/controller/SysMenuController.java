@@ -7,6 +7,7 @@ import com.tuling.common.core.exception.ServiceException;
 import com.tuling.common.core.param.ApiResponse;
 import com.tuling.common.web.controller.CrudBaseController;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
+import com.tuling.log.annotations.OperationLog;
 import com.tuling.system.constants.CommonConstants;
 import com.tuling.system.domain.dto.SysMenuSaveDto;
 import com.tuling.system.domain.entity.SysMenu;
@@ -52,12 +53,14 @@ public class SysMenuController extends CrudBaseController<SysMenuService, SysMen
     @Override
     @SaCheckPermission(PermissionConstants.ADMIN)
     @PostMapping("/saveOrUpdate")
+    @OperationLog(methodName = "menuSaveOrUpdate")
     public ApiResponse<Long> saveOrUpdate(@Validated @RequestBody SysMenuSaveDto dto) {
         return super.saveOrUpdate(dto);
     }
 
     @Override
     @SaCheckPermission(PermissionConstants.ADMIN)
+    @OperationLog(methodName = "menuRemoveByIds")
     public ApiResponse<Boolean> removeByIds(List<Long> ids) {
         return super.removeByIds(ids);
     }

@@ -16,6 +16,7 @@ import com.tuling.auth.service.LoginService;
 import com.tuling.common.core.exception.ServiceException;
 import com.tuling.common.core.param.ApiResponse;
 import com.tuling.common.satoken.utils.LoginHelper;
+import com.tuling.log.annotations.OperationLog;
 import com.tuling.system.domain.TlLoginUser;
 import com.tuling.system.domain.vo.SysTenantVo;
 import com.tuling.system.domain.vo.SysUserVo;
@@ -53,6 +54,7 @@ public class AuthController {
     private String sceneId="1gmllrc6";
 
     @PostMapping("/doLogin")
+    @OperationLog(methodName = "doLogin")
     public ApiResponse<UserLoginVo> doLogin(@RequestBody @Validated UserLoginDto loginDto) {
 
         UserLoginVo vo = loginService.loginByPassword(loginDto);
@@ -89,6 +91,7 @@ public class AuthController {
 
 
     @PostMapping("/updatePassword")
+    @OperationLog(methodName = "updatePassword")
     public ApiResponse<Boolean> updatePassword(@RequestBody UpdatePasswordDto dto) {
 
         loginService.updatePassword(dto);
@@ -97,7 +100,8 @@ public class AuthController {
 
     }
 
-    @RequestMapping("logout")
+    @RequestMapping("/logout")
+    @OperationLog(methodName = "logout")
     public ApiResponse<Void> logout() {
         StpUtil.logout();
         return ApiResponse.successNoData();
