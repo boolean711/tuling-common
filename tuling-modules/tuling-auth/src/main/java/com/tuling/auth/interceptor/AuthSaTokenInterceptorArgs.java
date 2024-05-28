@@ -20,7 +20,7 @@ public class AuthSaTokenInterceptorArgs implements ISaTokenInterceptorArgs {
 
     @Override
     public String[] notMatchAras() {
-        return new String[]{"/auth/doLogin", "/auth/logout"};
+        return new String[]{"/auth/doLogin", "/auth/logout","/auth/verifyIntelligentCaptcha"};
     }
 
     @Override

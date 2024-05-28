@@ -1,4 +1,4 @@
-package com.tuling.auth.domain;
+package com.tuling.auth.domain.dto;
 
 import lombok.Data;
 

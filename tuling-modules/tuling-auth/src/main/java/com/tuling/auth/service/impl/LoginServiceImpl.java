@@ -3,11 +3,20 @@ package com.tuling.auth.service.impl;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.crypto.digest.BCrypt;
+import cn.hutool.json.JSONUtil;
+import com.aliyun.captcha20230305.Client;
+import com.aliyun.captcha20230305.models.VerifyIntelligentCaptchaRequest;
+import com.aliyun.captcha20230305.models.VerifyIntelligentCaptchaResponse;
+import com.aliyun.captcha20230305.models.VerifyIntelligentCaptchaResponseBody;
+
+import com.aliyun.teaopenapi.models.Config;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.tuling.auth.domain.UpdatePasswordDto;
-import com.tuling.auth.domain.UserLoginDto;
+import com.tuling.auth.domain.dto.UpdatePasswordDto;
+import com.tuling.auth.domain.dto.UserLoginDto;
+import com.tuling.auth.domain.vo.UserLoginVo;
 import com.tuling.auth.service.LoginService;
 import com.tuling.common.core.exception.ServiceException;
+import com.tuling.common.core.param.ApiResponse;
 import com.tuling.common.core.properties.TenantProperties;
 import com.tuling.common.satoken.param.LoginUserDetails;
 import com.tuling.common.satoken.utils.LoginHelper;
@@ -19,7 +28,6 @@ import com.tuling.system.domain.entity.SysUser;
 import com.tuling.system.domain.vo.SysRoleVo;
 import com.tuling.system.domain.vo.SysTenantVo;
 import com.tuling.system.domain.vo.SysUserVo;
-import com.tuling.system.service.SysPermissionService;
 import com.tuling.system.service.SysRoleService;
 import com.tuling.system.service.SysTenantService;
 import com.tuling.system.service.SysUserService;
@@ -28,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -63,31 +72,47 @@ public class LoginServiceImpl implements LoginService {
 
     private static final Long MAX_INCORRECT_ATTEMPTS = 5L;
 
+
+    @Autowired
+    private Client client;
+
     @Override
-    public String loginByPassword(UserLoginDto loginDto) {
+    public UserLoginVo loginByPassword(UserLoginDto loginDto) {
+        UserLoginVo userLoginVo = new UserLoginVo();
+        VerifyIntelligentCaptchaResponseBody captchaResponseBody = verifyIntelligentCaptcha(loginDto.getSceneId(), loginDto.getCaptchaVerifyParam());
 
-        String incorrectLoginCountKey = String.format(RedisPrefixKey.INCORRECT_LOGIN_COUNT_PREFIX, loginDto.getUsername(), loginDto.getTenantId());
-        List<SysUserVo> userVoList = userService.getUserByUsername(loginDto.getUsername(), loginDto.getTenantId());
+        userLoginVo.setCaptchaResponseBody(captchaResponseBody);
 
-        if (CollectionUtils.isEmpty(userVoList)) {
-            throw new ServiceException("用户名/密码错误");
+        if (captchaResponseBody.getResult().verifyResult) {
+            String incorrectLoginCountKey = String.format(RedisPrefixKey.INCORRECT_LOGIN_COUNT_PREFIX, loginDto.getUsername(), loginDto.getTenantId());
+            List<SysUserVo> userVoList = userService.getUserByUsername(loginDto.getUsername(), loginDto.getTenantId());
+
+            if (CollectionUtils.isEmpty(userVoList)) {
+                throw new ServiceException("用户名/密码错误");
+            }
+            SysUserVo userByUsername = userVoList.get(0);
+            setRoleList(userByUsername);
+            setUserPermissions(userByUsername);
+            setTenantVo(userByUsername);
+            TlLoginUser loginUser = new TlLoginUser(userByUsername);
+
+
+            checkLoginTimes(incorrectLoginCountKey, loginUser);
+
+            checkPassword(loginDto, incorrectLoginCountKey, userByUsername);
+
+            if (checkTenantValid(loginUser, userByUsername)) {
+                String s = loginUserAndReturnToken(loginUser, userByUsername);
+
+                userLoginVo.setToken(s);
+                return userLoginVo;
+            }
+
+            throw new ServiceException("租户已到期，请联系管理员");
         }
-        SysUserVo userByUsername = userVoList.get(0);
-        setRoleList(userByUsername);
-        setUserPermissions(userByUsername);
-        setTenantVo(userByUsername);
-        TlLoginUser loginUser = new TlLoginUser(userByUsername);
+        return userLoginVo;
 
 
-        checkLoginTimes(incorrectLoginCountKey, loginUser);
-
-        checkPassword(loginDto, incorrectLoginCountKey, userByUsername);
-
-        if (checkTenantValid(loginUser, userByUsername)) {
-            return loginUserAndReturnToken(loginUser, userByUsername);
-        }
-
-        throw new ServiceException("租户已到期，请联系管理员");
     }
 
 
@@ -113,6 +138,27 @@ public class LoginServiceImpl implements LoginService {
 
     }
 
+    public VerifyIntelligentCaptchaResponseBody verifyIntelligentCaptcha(String sceneId, String captchaVerifyParam) {
+        // 创建APi请求
+        VerifyIntelligentCaptchaRequest request = new VerifyIntelligentCaptchaRequest();
+        // 本次验证的场景ID，建议传入，防止前端被篡改场景
+        request.sceneId = sceneId;
+        // 前端传来的验证参数 CaptchaVerifyParam
+        request.captchaVerifyParam = captchaVerifyParam;
+        try {
+
+            VerifyIntelligentCaptchaResponse resp = client.verifyIntelligentCaptcha(request);
+            // 建议使用您系统中的日志组件，打印返回
+            // 获取验证码验证结果（请注意判空），将结果返回给前端。出现异常建议认为验证通过，优先保证业务可用，然后尽快排查异常原因。
+            log.info("resp:{}", JSONUtil.toJsonStr(resp));
+            return resp.getBody();
+        } catch (Exception e) {
+            // 建议使用您系统中的日志组件，打印异常
+            // 出现异常建议认为验证通过，优先保证业务可用，然后尽快排查异常原因。
+            log.error("error:", e);
+            throw new ServiceException(e);
+        }
+    }
 
     private void setTenantVo(SysUserVo user) {
         SysTenant sysTenant = tenantService.getById(user.getTenantId());
@@ -181,6 +227,7 @@ public class LoginServiceImpl implements LoginService {
         sysUserVo.setRoleList(roleListByUserId);
 
     }
+
     private void checkPassword(UserLoginDto loginDto, String incorrectLoginCountKey, SysUserVo userByUsername) {
         if (!BCrypt.checkpw(loginDto.getPassword(), userByUsername.getPassword())) {
             Long aLong = incrementIncorrectLoginCount(incorrectLoginCountKey);

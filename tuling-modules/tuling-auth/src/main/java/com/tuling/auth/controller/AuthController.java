@@ -3,8 +3,15 @@ package com.tuling.auth.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.http.HttpStatus;
-import com.tuling.auth.domain.UpdatePasswordDto;
-import com.tuling.auth.domain.UserLoginDto;
+import cn.hutool.json.JSONUtil;
+
+import com.aliyun.captcha20230305.models.VerifyIntelligentCaptchaRequest;
+import com.aliyun.captcha20230305.models.VerifyIntelligentCaptchaResponse;
+import com.aliyun.captcha20230305.models.VerifyIntelligentCaptchaResponseBody;
+import com.aliyun.teaopenapi.models.Config;
+import com.tuling.auth.domain.dto.UpdatePasswordDto;
+import com.tuling.auth.domain.dto.UserLoginDto;
+import com.tuling.auth.domain.vo.UserLoginVo;
 import com.tuling.auth.service.LoginService;
 import com.tuling.common.core.exception.ServiceException;
 import com.tuling.common.core.param.ApiResponse;
@@ -13,18 +20,20 @@ import com.tuling.system.domain.TlLoginUser;
 import com.tuling.system.domain.vo.SysTenantVo;
 import com.tuling.system.domain.vo.SysUserVo;
 import com.tuling.system.service.SysTenantService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+
 
 /**
  * 登录测试
  */
 @RestController
 @RequestMapping("/auth")
+@Slf4j
 public class AuthController {
 
     @Autowired
@@ -36,12 +45,24 @@ public class AuthController {
     @Autowired
     private SysTenantService tenantService;
 
+    @Value("${aliyun.accessKeySecret}")
+    private String accessKeySecret;
+    @Value("${aliyun.accessKeyId}")
+    private String accessKeyId;
+
+    private String sceneId="1gmllrc6";
+
     @PostMapping("/doLogin")
-    public ApiResponse<String> doLogin(@RequestBody @Validated UserLoginDto loginDto) {
+    public ApiResponse<UserLoginVo> doLogin(@RequestBody @Validated UserLoginDto loginDto) {
 
-        String s = loginService.loginByPassword(loginDto);
+        UserLoginVo vo = loginService.loginByPassword(loginDto);
 
-        return ApiResponse.success(s).setMessage("登录成功").setShowMessage(true);
+        Boolean verifyResult = vo.getCaptchaResponseBody().getResult().verifyResult;
+        if (verifyResult){
+            return ApiResponse.success(vo).setMessage("登录成功").setShowMessage(true);
+        }
+        return  ApiResponse.success(vo);
+
     }
 
 
@@ -92,6 +113,7 @@ public class AuthController {
         return ApiResponse.success(currentLoginUser.isInitialPassword());
 
     }
+
 
 
 }
