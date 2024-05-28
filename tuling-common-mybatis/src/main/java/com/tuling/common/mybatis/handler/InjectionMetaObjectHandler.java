@@ -37,10 +37,8 @@ public class InjectionMetaObjectHandler implements MetaObjectHandler {
         log.info("新增开始自动填充=========");
 
         LoginUserDetails loginUser = LoginHelper.getCurrentLoginUser();
-        log.error("TokenHolderManager.getToken()：{}", SaTokenHolderManager.getToken());
-        if (SaTokenHolderManager.getToken()==null){
-            printCurrentStackTrace();
-        }
+        log.info("TokenHolderManager.getToken()：{}", SaTokenHolderManager.getToken());
+
         if (loginUser == null) {
             throw new MyBatisSystemException(new Exception("未知用户，插入元数据失败，请联系管理员"));
         }
@@ -110,10 +108,9 @@ public class InjectionMetaObjectHandler implements MetaObjectHandler {
         log.info("修改开始自动填充=========");
 
         LoginUserDetails loginUser = LoginHelper.getCurrentLoginUser();
-        log.error("TokenHolderManager.getToken()：{}", SaTokenHolderManager.getToken());
-        if (SaTokenHolderManager.getToken()==null){
-            printCurrentStackTrace();
-        }
+        log.info("TokenHolderManager.getToken()：{}", SaTokenHolderManager.getToken());
+        //第一次登录时，TokenHolderManager中的token是为null的，这时候获取的getCurrentLoginUser是从SaStorage中获取的，因为登录时会设置一次
+        //在 SaStorage 中存储的数据只在一次请求范围内有效，请求结束后数据自动清除。使用 SaStorage 时无需处于登录状态。
         if (loginUser == null) {
             throw new MyBatisSystemException(new Exception("未知用户，插入元数据失败，请联系管理员"));
         }
