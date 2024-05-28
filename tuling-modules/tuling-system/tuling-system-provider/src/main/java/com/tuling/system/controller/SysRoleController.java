@@ -29,7 +29,7 @@ public class SysRoleController extends CrudBaseController<SysRoleService, SysRol
     @Override
     @PostMapping("/saveOrUpdate")
     @OperationLog(methodName = "roleSaveOrUpdate")
-    public ApiResponse<Long> saveOrUpdate(SysRoleSaveDto dto) {
+    public ApiResponse<Long> saveOrUpdate(@RequestBody  SysRoleSaveDto dto) {
         return super.saveOrUpdate(dto);
     }
 

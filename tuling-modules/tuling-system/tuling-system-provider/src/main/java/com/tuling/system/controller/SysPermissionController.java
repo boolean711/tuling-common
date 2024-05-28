@@ -29,7 +29,7 @@ public class SysPermissionController
     @Override
     @PostMapping("/saveOrUpdate")
     @OperationLog(methodName = "permissionSaveOrUpdate")
-    public ApiResponse<Long> saveOrUpdate(SysPermissionSaveDto dto) {
+    public ApiResponse<Long> saveOrUpdate(@RequestBody  SysPermissionSaveDto dto) {
         return super.saveOrUpdate(dto);
     }
 
