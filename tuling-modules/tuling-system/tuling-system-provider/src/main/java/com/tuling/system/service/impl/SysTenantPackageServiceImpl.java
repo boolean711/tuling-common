@@ -42,22 +42,22 @@ public class SysTenantPackageServiceImpl extends CrudBaseServiceImpl<SysTenantPa
 
         if (CollectionUtils.isNotEmpty(tenantAdminRoleIds)) {
             roleMenuRelService.removeByRoleId(tenantAdminRoleIds);
-        }
+            List<Long> menuIds = Arrays.stream(entity.getMenuIds().split(",")).map(Long::parseLong).collect(Collectors.toList());
+            List<SysRoleMenuRel> roleMenuRelList = new ArrayList<>();
 
-        List<Long> menuIds = Arrays.stream(entity.getMenuIds().split(",")).map(Long::parseLong).collect(Collectors.toList());
-        List<SysRoleMenuRel> roleMenuRelList = new ArrayList<>();
-
-        for (Long roleId : tenantAdminRoleIds) {
-            for (Long menuId : menuIds) {
-                SysRoleMenuRel roleMenuRel = new SysRoleMenuRel();
-                roleMenuRel.setRoleId(roleId);
-                roleMenuRel.setMenuId(menuId);
-                roleMenuRelList.add(roleMenuRel);
+            for (Long roleId : tenantAdminRoleIds) {
+                for (Long menuId : menuIds) {
+                    SysRoleMenuRel roleMenuRel = new SysRoleMenuRel();
+                    roleMenuRel.setRoleId(roleId);
+                    roleMenuRel.setMenuId(menuId);
+                    roleMenuRelList.add(roleMenuRel);
+                }
             }
+
+            roleMenuRelService.saveBatch(roleMenuRelList);
         }
 
-        roleMenuRelService.saveBatch(roleMenuRelList);
 
-        super.afterSave(dto, entity);
+
     }
 }
