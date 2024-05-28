@@ -86,7 +86,7 @@ public class SysTenantServiceImpl
 
         String menuIds = tenantPackage.getMenuIds();
 
-        SysPermissionVo permissionByCode = permissionService.getPermissionByCode(PermissionConstants.ADMIN);
+        SysPermissionVo permissionByCode = permissionService.getPermissionByCode(PermissionConstants.TENANT_ADMIN);
 
         SysRoleSaveDto roleSaveDto = new SysRoleSaveDto();
 
