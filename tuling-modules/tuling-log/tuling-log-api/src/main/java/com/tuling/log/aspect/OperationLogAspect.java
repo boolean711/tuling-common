@@ -55,11 +55,12 @@ public class OperationLogAspect {
         log.setOperationParams(operationParams);
 
         log.setOperationIp(operationIp);
+        log.setTenantId(LoginHelper.getCurrentTenantId());
         Object result;
         try {
             result = joinPoint.proceed();
             log.setOperationResult(JSONUtil.toJsonStr(result));
-            log.setTenantId(LoginHelper.getCurrentTenantId());
+
         } catch (Exception e) {
             // 记录异常日志
             log.setOperationResult("Exception: " + e.getMessage());

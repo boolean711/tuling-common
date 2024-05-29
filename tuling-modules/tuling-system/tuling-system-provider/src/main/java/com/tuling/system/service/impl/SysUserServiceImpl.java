@@ -250,7 +250,7 @@ public class SysUserServiceImpl
         lqw.eq(SysUser::getUsername, dto.getUsername());
         lqw.eq(SysUser::getTenantId, dto.getTenantId());
         if (dto.getId()!=null){
-            lqw.ne(SysUser::getUsername,dto.getId());
+            lqw.ne(SysUser::getId,dto.getId());
         }
 
         if (this.count(lqw) > 0) {
