@@ -21,6 +21,7 @@ import com.tuling.common.core.properties.TenantProperties;
 import com.tuling.common.satoken.param.LoginUserDetails;
 import com.tuling.common.satoken.utils.LoginHelper;
 import com.tuling.common.utils.IpUtil;
+import com.tuling.security.service.EncryptionService;
 import com.tuling.system.constants.RedisPrefixKey;
 import com.tuling.system.domain.TlLoginUser;
 import com.tuling.system.domain.entity.SysTenant;
@@ -76,14 +77,19 @@ public class LoginServiceImpl implements LoginService {
     @Autowired
     private Client client;
 
+    @Autowired
+    private EncryptionService encryptionService;
+
     @Override
     public UserLoginVo loginByPassword(UserLoginDto loginDto) {
+
         UserLoginVo userLoginVo = new UserLoginVo();
         VerifyIntelligentCaptchaResponseBody captchaResponseBody = verifyIntelligentCaptcha(loginDto.getSceneId(), loginDto.getCaptchaVerifyParam());
 
         userLoginVo.setCaptchaResponseBody(captchaResponseBody);
 
         if (captchaResponseBody.getResult().verifyResult) {
+
             String incorrectLoginCountKey = String.format(RedisPrefixKey.INCORRECT_LOGIN_COUNT_PREFIX, loginDto.getUsername(), loginDto.getTenantId());
             List<SysUserVo> userVoList = userService.getUserByUsername(loginDto.getUsername(), loginDto.getTenantId());
 
@@ -98,6 +104,7 @@ public class LoginServiceImpl implements LoginService {
 
 
             checkLoginTimes(incorrectLoginCountKey, loginUser);
+
 
             checkPassword(loginDto, incorrectLoginCountKey, userByUsername);
 
@@ -229,6 +236,8 @@ public class LoginServiceImpl implements LoginService {
     }
 
     private void checkPassword(UserLoginDto loginDto, String incorrectLoginCountKey, SysUserVo userByUsername) {
+
+        loginDto.setPassword(encryptionService.decryptData(loginDto.getSessionId(), loginDto.getPassword()));
         if (!BCrypt.checkpw(loginDto.getPassword(), userByUsername.getPassword())) {
             Long aLong = incrementIncorrectLoginCount(incorrectLoginCountKey);
             Long residue = MAX_INCORRECT_ATTEMPTS - aLong;

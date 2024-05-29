@@ -1,8 +1,10 @@
 package com.tuling.log.aspect;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONConfig;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import cn.hutool.json.ObjectMapper;
 import com.tuling.common.satoken.param.LoginUserDetails;
 import com.tuling.common.satoken.utils.LoginHelper;
 import com.tuling.common.utils.IpUtil;
@@ -93,6 +95,9 @@ public class OperationLogAspect {
             return Arrays.stream(args)
                     .map(arg -> {
                         try {
+                            if (arg instanceof Number ){
+                                return arg.getClass().getSimpleName() + ": " + arg;
+                            }
                             return arg.getClass().getSimpleName() + ": " + JSONUtil.toJsonStr(arg);
                         } catch (Exception e) {
                             return arg.getClass().getSimpleName() + ": [Error converting to JSON]";
@@ -103,4 +108,5 @@ public class OperationLogAspect {
         return "";
 
     }
+
 }

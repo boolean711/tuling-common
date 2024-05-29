@@ -24,6 +24,10 @@
             <groupId>com.tuling</groupId>
             <artifactId>tuling-log-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.tuling</groupId>
+            <artifactId>tuling-security</artifactId>
+        </dependency>
 
     </dependencies>
 

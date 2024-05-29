@@ -1,5 +1,6 @@
 package com.tuling.security.controller;
 
+import com.tuling.common.core.param.ApiResponse;
 import com.tuling.security.service.EncryptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +13,7 @@ public class EncryptionController {
     private EncryptionService encryptionService;
 
     @PostMapping("/publicKey")
-    public String getPublicKey(@RequestParam("sessionId") String sessionId) {
-        return encryptionService.generateAndStoreKeyPair(sessionId);
+    public ApiResponse<String> getPublicKey(@RequestParam("sessionId") String sessionId) {
+        return ApiResponse.success( encryptionService.generateAndStoreKeyPair(sessionId));
     }
 }

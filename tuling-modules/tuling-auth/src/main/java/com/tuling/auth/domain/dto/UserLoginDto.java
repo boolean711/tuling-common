@@ -12,6 +12,8 @@ public class UserLoginDto {
 
     @NotNull
     private Long tenantId;
+    @NotBlank
+    private String sessionId;
 
 
 
