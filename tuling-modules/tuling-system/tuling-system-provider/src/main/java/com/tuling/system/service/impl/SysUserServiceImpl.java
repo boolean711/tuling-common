@@ -71,18 +71,30 @@ public class SysUserServiceImpl
 
         userRoleRelService.removeByUserId(dto.getId());
 
+
+    }
+
+    @Override
+    @Transactional
+    public Long saveOrUpdate(SysUserSaveDto dto) {
+        boolean needLogout = false;
         if (dto.getId() != null) {
             SysUser oldUser = this.getById(dto.getId());
 
             if (!oldUser.getUsername().equals(dto.getUsername())) {
-                StpUtil.logout(dto.getId());
+                needLogout = true;
             }
 
         }
 
+        Long id = super.saveOrUpdate(dto);
+
+        if (needLogout) {
+            StpUtil.logout(dto.getId());
+        }
+        return id;
 
     }
-
 
     @Override
     public void afterSave(SysUserSaveDto dto, SysUser entity) {
