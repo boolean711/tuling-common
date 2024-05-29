@@ -62,7 +62,7 @@ public class SysUserServiceImpl
     public void beforeSave(SysUserSaveDto dto) {
 
         checkTenant(dto.getTenantId());
-        checkRole(dto.getRoleIds());
+        checkRole(dto.getRoleIds(), dto.getId());
         checkUserNamePassword(dto);
         if (dto.getId() == null) {
             dto.setCode(codeRuleService.generateCode(CodeRuleConstants.USER_CODE_PREFIX));
@@ -88,10 +88,12 @@ public class SysUserServiceImpl
                 rel.setRoleId(roleId);
                 relList.add(rel);
             }
-
             userRoleRelService.saveBatch(relList);
         }
+
     }
+
+
 
     @Override
     public void afterPageListByExpression(List<SysUserVo> records) {
@@ -188,6 +190,7 @@ public class SysUserServiceImpl
 
     }
 
+
     private void checkRemoveUser(Long id) {
         List<SysRoleVo> roleListByUserId = roleService.getRoleListByUserId(id);
         boolean isAdmin = LoginHelper.isAdmin();
@@ -210,14 +213,14 @@ public class SysUserServiceImpl
     }
 
 
-    private void checkRole(List<Long> roleIds) {
+    private void checkRole(List<Long> roleIds, Long id) {
 
         if (!LoginHelper.isAdmin()) {
             for (Long roleId : roleIds) {
                 if (permissionService.isGivenPermissionByRoleId(roleId, Collections.singletonList(PermissionConstants.ADMIN))) {
                     throw new ServiceException("异常角色绑定");
                 }
-                if (permissionService.isGivenPermissionByRoleId(roleId, Collections.singletonList(PermissionConstants.TENANT_ADMIN))){
+                if (id != null && permissionService.isGivenPermissionByRoleId(roleId, Collections.singletonList(PermissionConstants.TENANT_ADMIN))) {
                     throw new ServiceException("租户管理员无法修改");
                 }
             }
@@ -243,7 +246,7 @@ public class SysUserServiceImpl
                 throw new ServiceException("账号密码为空");
             }
         } else {
-            if ( StrUtil.isNotBlank(dto.getPassword())) {
+            if (StrUtil.isNotBlank(dto.getPassword())) {
                 throw new ServiceException("不允许修改密码");
             }
         }
@@ -252,8 +255,8 @@ public class SysUserServiceImpl
 
         lqw.eq(SysUser::getUsername, dto.getUsername());
         lqw.eq(SysUser::getTenantId, dto.getTenantId());
-        if (dto.getId()!=null){
-            lqw.ne(SysUser::getId,dto.getId());
+        if (dto.getId() != null) {
+            lqw.ne(SysUser::getId, dto.getId());
         }
 
         if (this.count(lqw) > 0) {
