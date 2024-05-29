@@ -220,9 +220,6 @@ public class SysUserServiceImpl
                 if (permissionService.isGivenPermissionByRoleId(roleId, Collections.singletonList(PermissionConstants.ADMIN))) {
                     throw new ServiceException("异常角色绑定");
                 }
-                if (id != null && permissionService.isGivenPermissionByRoleId(roleId, Collections.singletonList(PermissionConstants.TENANT_ADMIN))) {
-                    throw new ServiceException("租户管理员无法修改");
-                }
             }
         }
 
