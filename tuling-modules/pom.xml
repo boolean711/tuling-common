@@ -16,6 +16,7 @@
         <module>tuling-auth</module>
         <module>tuling-wxmq</module>
         <module>tuling-log</module>
+        <module>tuling-security</module>
 
     </modules>
     <properties>

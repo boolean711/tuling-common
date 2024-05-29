@@ -92,6 +92,11 @@
                 <artifactId>tuling-log-provider</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>com.tuling</groupId>
+                <artifactId>tuling-security</artifactId>
+                <version>${revision}</version>
+            </dependency>
         </dependencies>
 
     </dependencyManagement>

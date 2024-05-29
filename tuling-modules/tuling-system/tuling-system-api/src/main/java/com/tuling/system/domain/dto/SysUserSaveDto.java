@@ -25,7 +25,7 @@ public class SysUserSaveDto extends BaseSaveDto {
     private String avatarUrl;
 
 
-
+    @NotBlank
     private String username;
     private String status;
 

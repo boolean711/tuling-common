@@ -236,12 +236,12 @@ public class SysUserServiceImpl
     private void checkUserNamePassword(SysUserSaveDto dto) {
 
         if (dto.getId() == null) {
-            if (StrUtil.isBlank(dto.getUsername()) || StrUtil.isBlank(dto.getPassword())) {
+            if (StrUtil.isBlank(dto.getPassword())) {
                 throw new ServiceException("账号密码为空");
             }
         } else {
-            if (StrUtil.isNotBlank(dto.getUsername()) || StrUtil.isNotBlank(dto.getPassword())) {
-                throw new ServiceException("不允许修改账号密码");
+            if ( StrUtil.isNotBlank(dto.getPassword())) {
+                throw new ServiceException("不允许修改密码");
             }
         }
 
@@ -249,6 +249,9 @@ public class SysUserServiceImpl
 
         lqw.eq(SysUser::getUsername, dto.getUsername());
         lqw.eq(SysUser::getTenantId, dto.getTenantId());
+        if (dto.getId()!=null){
+            lqw.ne(SysUser::getUsername,dto.getId());
+        }
 
         if (this.count(lqw) > 0) {
             throw new ServiceException("该账号已存在");
