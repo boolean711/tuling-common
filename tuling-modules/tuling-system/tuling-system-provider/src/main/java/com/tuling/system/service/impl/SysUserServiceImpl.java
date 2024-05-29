@@ -71,6 +71,15 @@ public class SysUserServiceImpl
 
         userRoleRelService.removeByUserId(dto.getId());
 
+        if (dto.getId() != null) {
+            SysUser oldUser = this.getById(dto.getId());
+
+            if (!oldUser.getUsername().equals(dto.getUsername())) {
+                StpUtil.logout(dto.getId());
+            }
+
+        }
+
 
     }
 
@@ -92,7 +101,6 @@ public class SysUserServiceImpl
         }
 
     }
-
 
 
     @Override
