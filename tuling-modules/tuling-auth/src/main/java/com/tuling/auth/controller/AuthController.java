@@ -55,7 +55,7 @@ public class AuthController {
     private String sceneId="1gmllrc6";
 
     @PostMapping("/doLogin")
-    @OperationLog(methodName = "doLogin",isLogin = true)
+    @OperationLog(methodName = "doLogin")
     public ApiResponse<UserLoginVo> doLogin(@RequestBody @Validated UserLoginDto loginDto) {
 
         UserLoginVo vo = loginService.loginByPassword(loginDto);
@@ -107,7 +107,7 @@ public class AuthController {
         LoginUserDetails loginUser = LoginHelper.getCurrentLoginUser();
 
         StpUtil.logout();
-        //设置临时用户,记录日志使用
+        //设置临时用户,主动退出时可记录日志使用
         LoginHelper.storageSetLoginUser(loginUser);
         return ApiResponse.successNoData();
     }

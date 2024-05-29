@@ -64,30 +64,16 @@ public class OperationLogAspect {
             throw e;
         } finally {
             //登录接口特殊处理，因为可以没有登录成功，获取不到人员信息
-            LoginUserDetails loginUser = null;
-            if (!operationLogAnnotation.isLogin()) {
-                loginUser = LoginHelper.getCurrentLoginUser();
-            } else {
-                JSONObject jsonObject = JSONUtil.parseObj(log.getOperationResult());
-
-                JSONObject data = jsonObject.getJSONObject("data");
-                String token = data.get("token", String.class);
-
-
-                if (StrUtil.isNotBlank(token)) {
-                    loginUser = LoginHelper.getCurrentLoginUser();
-                }else{
-                    log.setNeedInsertMetaData(false);
-                    log.setCreateId(null);
-                    log.setCreateTime(new Date());
-                    log.setUpdateTime(new Date());
-                    log.setOperator("未知用户，登录失败");
-
-                }
-            }
+            LoginUserDetails loginUser = LoginHelper.getCurrentLoginUser();
 
             if (loginUser != null) {
                 log.setOperator(loginUser.getNickName());
+            } else {
+                log.setNeedInsertMetaData(false);
+                log.setCreateTime(new Date());
+                log.setUpdateTime(new Date());
+                log.setOperator("未知用户");
+
             }
 
             operationLogService.save(log);
