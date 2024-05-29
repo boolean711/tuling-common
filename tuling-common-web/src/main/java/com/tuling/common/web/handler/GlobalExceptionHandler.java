@@ -25,9 +25,24 @@ public class GlobalExceptionHandler {
 
         log.error("发生了异常",e);
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        // 获取请求的URI
+        String requestURI = request.getRequestURI();
+
+        // 获取上下文路径
+        String contextPath = request.getContextPath();
+
+        // 获取Servlet路径
+        String servletPath = request.getServletPath();
+
+        // 获取路径信息
+        String pathInfo = request.getPathInfo();
         log.error("操作IP：{}", IpUtil.getClientIpAddr(request));
-        log.error("请求路径：{}",request.getContextPath());
+        log.error("requestURI：{}",requestURI);
+        log.error("contextPath：{}",contextPath);
+        log.error("servletPath：{}",servletPath);
+        log.error("pathInfo：{}",pathInfo);
         if (e instanceof ServiceException) {
+
             return ApiResponse.error(((ServiceException) e).getCode(), e.getMessage());
         }
         if (e instanceof NotLoginException){
