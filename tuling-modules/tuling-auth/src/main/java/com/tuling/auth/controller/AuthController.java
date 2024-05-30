@@ -109,7 +109,7 @@ public class AuthController {
         StpUtil.logout();
         //设置临时用户,主动退出时可记录日志使用
         LoginHelper.storageSetLoginUser(loginUser);
-        return ApiResponse.successNoData();
+        return ApiResponse.successNoData().setMessage("退出成功").setShowMessage(true);
     }
 
 

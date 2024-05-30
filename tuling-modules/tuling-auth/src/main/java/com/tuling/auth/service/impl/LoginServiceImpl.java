@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -124,7 +125,12 @@ public class LoginServiceImpl implements LoginService {
 
 
     @Override
+    @Transactional
     public void updatePassword(UpdatePasswordDto dto) {
+        String[] strings = encryptionService.decryptData(dto.getSessionId(), dto.getNewPassword(), dto.getOldPassword());
+
+        dto.setNewPassword(strings[0]);
+        dto.setOldPassword(strings[1]);
         LoginUserDetails loginUser = LoginHelper.getCurrentLoginUser();
 
         if (loginUser == null) {
@@ -237,7 +243,7 @@ public class LoginServiceImpl implements LoginService {
 
     private void checkPassword(UserLoginDto loginDto, String incorrectLoginCountKey, SysUserVo userByUsername) {
 
-        loginDto.setPassword(encryptionService.decryptData(loginDto.getSessionId(), loginDto.getPassword()));
+        loginDto.setPassword(encryptionService.decryptData(loginDto.getSessionId(), loginDto.getPassword())[0]);
         if (!BCrypt.checkpw(loginDto.getPassword(), userByUsername.getPassword())) {
             Long aLong = incrementIncorrectLoginCount(incorrectLoginCountKey);
             Long residue = MAX_INCORRECT_ATTEMPTS - aLong;

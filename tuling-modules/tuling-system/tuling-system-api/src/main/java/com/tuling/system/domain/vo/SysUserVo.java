@@ -29,7 +29,7 @@ public class SysUserVo extends BaseVo {
     private SysTenantVo tenantVo;
 
     private String gender;
-
+    private String email;
 
     private String version;
 

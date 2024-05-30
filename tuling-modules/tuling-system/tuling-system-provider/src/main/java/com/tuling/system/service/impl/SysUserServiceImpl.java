@@ -62,15 +62,26 @@ public class SysUserServiceImpl
     public void beforeSave(SysUserSaveDto dto) {
 
         checkTenant(dto.getTenantId());
-        checkRole(dto.getRoleIds(), dto.getId());
+        checkRole(dto.getRoleIds());
         checkUserNamePassword(dto);
         if (dto.getId() == null) {
             dto.setCode(codeRuleService.generateCode(CodeRuleConstants.USER_CODE_PREFIX));
             dto.setPassword(BCrypt.hashpw(dto.getPassword()));
         }
 
-        userRoleRelService.removeByUserId(dto.getId());
+        if (!dto.isUpdateSelf()) {
+            //自身修改时禁止修改权限
+            userRoleRelService.removeByUserId(dto.getId());
 
+
+        }
+
+
+        if (dto.isUpdateSelf()) {
+            if (dto.getId() != null && !dto.getId().equals(LoginHelper.getCurrentLoginUser().getId())) {
+                throw new ServiceException("数据异常");
+            }
+        }
 
     }
 
@@ -98,19 +109,21 @@ public class SysUserServiceImpl
 
     @Override
     public void afterSave(SysUserSaveDto dto, SysUser entity) {
+        if (!dto.isUpdateSelf()) {
+            List<SysUserRoleRel> relList = new ArrayList<>();
 
-
-        List<SysUserRoleRel> relList = new ArrayList<>();
-
-        if (CollectionUtils.isNotEmpty(dto.getRoleIds())) {
-            for (Long roleId : dto.getRoleIds()) {
-                SysUserRoleRel rel = new SysUserRoleRel();
-                rel.setUserId(entity.getId());
-                rel.setRoleId(roleId);
-                relList.add(rel);
+            if (CollectionUtils.isNotEmpty(dto.getRoleIds())) {
+                for (Long roleId : dto.getRoleIds()) {
+                    SysUserRoleRel rel = new SysUserRoleRel();
+                    rel.setUserId(entity.getId());
+                    rel.setRoleId(roleId);
+                    relList.add(rel);
+                }
+                userRoleRelService.saveBatch(relList);
             }
-            userRoleRelService.saveBatch(relList);
+
         }
+
 
     }
 
@@ -233,7 +246,7 @@ public class SysUserServiceImpl
     }
 
 
-    private void checkRole(List<Long> roleIds, Long id) {
+    private void checkRole(List<Long> roleIds) {
 
         if (!LoginHelper.isAdmin()) {
             for (Long roleId : roleIds) {

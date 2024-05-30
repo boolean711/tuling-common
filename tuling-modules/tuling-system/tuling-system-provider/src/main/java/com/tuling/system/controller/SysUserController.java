@@ -19,12 +19,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/system/user")
-@SaCheckPermission(value = {PermissionConstants.ADMIN, PermissionConstants.TENANT_ADMIN}, mode = SaMode.OR)
 public class SysUserController extends CrudBaseController<SysUserService, SysUser, SysUserVo, SysUserSaveDto> {
 
 
     @PostMapping("/changeUserStatus")
     @OperationLog(methodName = "changeUserStatus")
+    @SaCheckPermission(value = {PermissionConstants.ADMIN, PermissionConstants.TENANT_ADMIN}, mode = SaMode.OR)
     public ApiResponse<String> changeUserStatus(@RequestParam("userId") Long userId, @RequestParam("status") String status) {
 
         service.changeUserStatus(userId, status);
@@ -33,6 +33,7 @@ public class SysUserController extends CrudBaseController<SysUserService, SysUse
 
     @PostMapping("/resetPassword/{id}")
     @OperationLog(methodName = "resetPassword")
+    @SaCheckPermission(value = {PermissionConstants.ADMIN, PermissionConstants.TENANT_ADMIN}, mode = SaMode.OR)
     public ApiResponse<Boolean> resetPassword(@PathVariable("id") Long id) {
         return  ApiResponse.success(service.resetPassword(id)).setShowMessage(true).setMessage("重置成功");
     }
@@ -46,6 +47,7 @@ public class SysUserController extends CrudBaseController<SysUserService, SysUse
     @Override
     @PostMapping("/removeByIds")
     @OperationLog(methodName = "userRemoveByIds")
+    @SaCheckPermission(value = {PermissionConstants.ADMIN, PermissionConstants.TENANT_ADMIN}, mode = SaMode.OR)
     public ApiResponse<Boolean> removeByIds(@RequestBody List<Long> ids) {
         return super.removeByIds(ids);
     }

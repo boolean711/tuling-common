@@ -15,6 +15,7 @@ public class ApiResponse<T> {
     private T data;
 
     private boolean showMessage = false;
+
     public static <T> ApiResponse<T> success(T data, String message) {
         return ApiResponse.<T>builder()
                 .code(200)
@@ -40,8 +41,8 @@ public class ApiResponse<T> {
         return error(code, "error");
     }
 
-    public static <T> ApiResponse<T> successNoData() {
-        return ApiResponse.<T>builder()
+    public static ApiResponse<Void> successNoData() {
+        return ApiResponse.<Void>builder()
                 .code(200)
                 .build();
     }

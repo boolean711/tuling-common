@@ -12,7 +12,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -37,28 +39,30 @@ public class EncryptionService {
         return publicKeyBase64;
     }
 
-    public String decryptData(String sessionId, String encryptedData) {
+
+    public String[] decryptData(String sessionId, String... encryptedData) {
         String format = String.format(RedisKeyPrefixConstants.PRIVATE_KEYB_ASE64, sessionId);
-        log.info("format:{}",format);
+        log.info("format:{}", format);
         try {
-
-
             String privateKeyBase64 = (String) redisTemplate.opsForValue().get(format);
             if (privateKeyBase64 == null) {
                 throw new ServiceException("Private key not found in Redis for session: " + sessionId);
             }
 
-
             RSA rsa = new RSA(privateKeyBase64, null);
+            List<String> decryptedDataList = new ArrayList<>();
 
-            // 使用私钥解密
-            byte[] decryptedBytes = rsa.decrypt(Base64.getDecoder().decode(encryptedData), KeyType.PrivateKey);
-            return new String(decryptedBytes, StandardCharsets.UTF_8);
-        }finally {
+            for (String data : encryptedData) {
+                // 使用私钥解密
+                byte[] decryptedBytes = rsa.decrypt(Base64.getDecoder().decode(data), KeyType.PrivateKey);
+                decryptedDataList.add(new String(decryptedBytes, StandardCharsets.UTF_8));
+            }
+
+            // 返回解密后的数据数组
+            return decryptedDataList.toArray(new String[0]);
+        } finally {
             Boolean delete = redisTemplate.delete(format);
-            log.info("delete:{}",delete);
-
+            log.info("delete:{}", delete);
         }
-
     }
 }

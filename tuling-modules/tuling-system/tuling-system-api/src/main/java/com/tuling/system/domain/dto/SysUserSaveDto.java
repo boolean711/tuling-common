@@ -38,4 +38,8 @@ public class SysUserSaveDto extends BaseSaveDto {
     @NotNull
     private Long tenantId;
 
+    //自身修改
+    private boolean updateSelf=false;
+
+    private String email;
 }
