@@ -17,5 +17,4 @@ public class SysTenantVo extends BaseVo {
     private Date validTime;
 
     private Long packageId;
-    private Integer textMessageQty;
 }
