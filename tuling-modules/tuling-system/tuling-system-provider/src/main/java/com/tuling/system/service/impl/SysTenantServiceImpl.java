@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.tuling.common.core.constants.PermissionConstants;
 import com.tuling.common.core.exception.ServiceException;
+import com.tuling.common.satoken.utils.LoginHelper;
 import com.tuling.common.utils.BeanListUtils;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
 import com.tuling.system.constants.CodeRuleConstants;
@@ -59,8 +60,13 @@ public class SysTenantServiceImpl
     @Override
     public void beforeSave(SysTenantSaveDto dto) {
 
-        if (dto.getId() == null || StrUtil.isBlank(dto.getTenantCode())) {
-            dto.setTenantCode(codeRuleService.generateCode(CodeRuleConstants.TENANT_INFO_CODE_PREFIX));
+        if (dto.getId() == null ) {
+            if (!LoginHelper.isAdmin()){
+                throw new ServiceException("数据异常");
+            }
+            if (StrUtil.isBlank(dto.getTenantCode())){
+                dto.setTenantCode(codeRuleService.generateCode(CodeRuleConstants.TENANT_INFO_CODE_PREFIX));
+            }
         }
     }
 

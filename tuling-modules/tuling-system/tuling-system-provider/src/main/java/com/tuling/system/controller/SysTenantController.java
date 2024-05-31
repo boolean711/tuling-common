@@ -13,6 +13,7 @@ import com.tuling.system.domain.dto.SysTenantSaveDto;
 import com.tuling.system.domain.entity.SysTenant;
 import com.tuling.system.domain.vo.SysTenantVo;
 import com.tuling.system.service.SysTenantService;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,10 +25,10 @@ public class SysTenantController extends CrudBaseController<SysTenantService, Sy
 
 
     @Override
-    @SaCheckPermission(value = {PermissionConstants.ADMIN})
+    @SaCheckPermission(value = {PermissionConstants.ADMIN, PermissionConstants.TENANT_ADMIN}, mode = SaMode.OR)
     @PostMapping("/saveOrUpdate")
     @OperationLog(methodName = "tenantSaveOrUpdate")
-    public ApiResponse<Long> saveOrUpdate(@RequestBody SysTenantSaveDto dto) {
+    public ApiResponse<Long> saveOrUpdate(@RequestBody @Validated SysTenantSaveDto dto) {
         return super.saveOrUpdate(dto);
     }
 

@@ -12,6 +12,7 @@ import com.tuling.system.domain.dto.SysUserSaveDto;
 import com.tuling.system.domain.entity.SysUser;
 import com.tuling.system.domain.vo.SysUserVo;
 import com.tuling.system.service.SysUserService;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,7 +41,7 @@ public class SysUserController extends CrudBaseController<SysUserService, SysUse
     @Override
     @PostMapping("/saveOrUpdate")
     @OperationLog(methodName = "userSaveOrUpdate")
-    public ApiResponse<Long> saveOrUpdate(@RequestBody SysUserSaveDto dto) {
+    public ApiResponse<Long> saveOrUpdate(@RequestBody @Validated  SysUserSaveDto dto) {
         return super.saveOrUpdate(dto);
     }
 

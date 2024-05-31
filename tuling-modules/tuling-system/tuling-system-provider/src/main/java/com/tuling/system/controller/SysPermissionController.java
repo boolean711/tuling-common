@@ -12,7 +12,9 @@ import com.tuling.system.domain.entity.SysPermission;
 import com.tuling.system.domain.vo.SysPermissionVo;
 import com.tuling.system.mapper.SysPermissionMapper;
 import com.tuling.system.service.SysPermissionService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +31,7 @@ public class SysPermissionController
     @Override
     @PostMapping("/saveOrUpdate")
     @OperationLog(methodName = "permissionSaveOrUpdate")
-    public ApiResponse<Long> saveOrUpdate(@RequestBody  SysPermissionSaveDto dto) {
+    public ApiResponse<Long> saveOrUpdate(@RequestBody @Validated SysPermissionSaveDto dto) {
         return super.saveOrUpdate(dto);
     }
 
