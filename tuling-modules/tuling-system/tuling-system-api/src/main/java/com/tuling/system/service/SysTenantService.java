@@ -17,8 +17,6 @@ public interface SysTenantService extends CrudBaseIService<SysTenant, SysTenantV
 
 
 
-    void deductionTextMessageQty(Integer qty, Long tenantId);
-
     default boolean isTenantValid(Long id) {
 
         SysTenantVo tenantVo = this.getInfoById(id);
@@ -30,4 +28,6 @@ public interface SysTenantService extends CrudBaseIService<SysTenant, SysTenantV
         }
         return false;
     }
+
+    void renew(Integer numMonth,Long id);
 }

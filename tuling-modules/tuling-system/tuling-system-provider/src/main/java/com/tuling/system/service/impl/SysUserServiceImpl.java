@@ -21,6 +21,7 @@ import com.tuling.system.domain.dto.SysUserSaveDto;
 import com.tuling.system.domain.entity.SysUser;
 import com.tuling.system.domain.entity.SysUserRoleRel;
 import com.tuling.system.domain.vo.SysRoleVo;
+import com.tuling.system.domain.vo.SysTenantVo;
 import com.tuling.system.domain.vo.SysUserVo;
 import com.tuling.system.mapper.SysUserMapper;
 import com.tuling.system.service.*;
@@ -57,6 +58,10 @@ public class SysUserServiceImpl
     @Qualifier("jacksonRedisTemplate")
     private RedisTemplate<String, Object> redisTemplate;
 
+    @Autowired
+    @Lazy
+    private SysTenantService tenantService;
+
 
     @Override
     public void beforeSave(SysUserSaveDto dto) {
@@ -72,10 +77,7 @@ public class SysUserServiceImpl
         if (!dto.isUpdateSelf()) {
             //自身修改时禁止修改权限
             userRoleRelService.removeByUserId(dto.getId());
-
-
         }
-
 
         if (dto.isUpdateSelf()) {
             if (dto.getId() != null && !dto.getId().equals(LoginHelper.getCurrentLoginUser().getId())) {
@@ -300,7 +302,11 @@ public class SysUserServiceImpl
 
         Map<Long, List<Long>> userRoleIdMap = userRoleRelService.getUserRoleIdMap(userIds);
 
+
         Map<Long, SysRoleVo> idVoMap = roleService.getIdVoMap(null);
+
+        Map<Long, SysTenantVo> tenantVoMap = tenantService.getIdVoMap(null);
+
 
         for (SysUserVo record : records) {
 
@@ -319,6 +325,9 @@ public class SysUserServiceImpl
                 }
                 record.setRoleList(roleVoList);
             }
+
+            SysTenantVo tenantVo = tenantVoMap.get(record.getTenantId());
+            record.setTenantVo(tenantVo);
 
         }
     }

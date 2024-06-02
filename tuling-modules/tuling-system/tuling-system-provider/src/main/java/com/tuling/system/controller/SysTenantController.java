@@ -1,7 +1,6 @@
 package com.tuling.system.controller;
 
 
-
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.dev33.satoken.annotation.SaMode;
@@ -23,7 +22,6 @@ import java.util.List;
 public class SysTenantController extends CrudBaseController<SysTenantService, SysTenant, SysTenantVo, SysTenantSaveDto> {
 
 
-
     @Override
     @SaCheckPermission(value = {PermissionConstants.ADMIN, PermissionConstants.TENANT_ADMIN}, mode = SaMode.OR)
     @PostMapping("/saveOrUpdate")
@@ -40,6 +38,14 @@ public class SysTenantController extends CrudBaseController<SysTenantService, Sy
         return super.removeByIds(ids);
     }
 
+    @SaCheckPermission(value = {PermissionConstants.ADMIN})
+    @PostMapping("/renew")
+    @OperationLog(methodName = "tenantRenew")
+    public ApiResponse<Void> renew(@RequestParam("numMonth") Integer numMonth,@RequestParam("id") Long id) {
+        service.renew(numMonth,id);
+        return ApiResponse.successNoData().setMessage("续费成功").setShowMessage(true);
+    }
+
     @PostMapping("/getTenantByUserName")
     @SaIgnore
     public ApiResponse<List<SysTenantVo>> getTenantByUserName(@RequestParam("userName") String userName) {
@@ -48,4 +54,6 @@ public class SysTenantController extends CrudBaseController<SysTenantService, Sy
 
         return ApiResponse.success(tenantVoList);
     }
+
+
 }

@@ -1,5 +1,7 @@
 package com.tuling.system.service.impl;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.tuling.common.core.constants.PermissionConstants;
@@ -29,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,13 +63,14 @@ public class SysTenantServiceImpl
     @Override
     public void beforeSave(SysTenantSaveDto dto) {
 
-        if (dto.getId() == null ) {
-            if (!LoginHelper.isAdmin()){
+        if (dto.getId() == null) {
+            if (!LoginHelper.isAdmin()) {
                 throw new ServiceException("数据异常");
             }
-            if (StrUtil.isBlank(dto.getTenantCode())){
+            if (StrUtil.isBlank(dto.getTenantCode())) {
                 dto.setTenantCode(codeRuleService.generateCode(CodeRuleConstants.TENANT_INFO_CODE_PREFIX));
             }
+            dto.setValidTime(new Date());
         }
     }
 
@@ -78,6 +82,22 @@ public class SysTenantServiceImpl
             eventPublisher.publishEvent(new AfterSaveTenantEvent(this, entity.getId()));
         }
 
+
+    }
+
+    @Override
+    @Transactional
+    public void renew(Integer numMonth, Long id) {
+
+        SysTenant tenant = this.getById(id);
+
+
+        if (tenant == null) {
+            throw new ServiceException("未知租户");
+        }
+
+        tenant.setValidTime(DateUtil.offset(tenant.getValidTime(), DateField.MONTH, numMonth));
+        this.updateById(tenant);
 
     }
 
@@ -165,29 +185,6 @@ public class SysTenantServiceImpl
 
 
         return Collections.emptyList();
-    }
-
-
-    @Override
-    @Transactional
-    public void deductionTextMessageQty(Integer qty, Long tenantId) {
-
-        if (tenantId == null) {
-            throw new ServiceException("未知租户数据");
-        }
-        SysTenant tenant = this.getById(tenantId);
-
-        if (tenant == null) {
-            throw new ServiceException("未知租户数据");
-        }
-
-        if (qty > 0) {
-            tenant.setTextMessageQty(tenant.getTextMessageQty() - qty);
-            this.updateById(tenant);
-
-        }
-
-
     }
 
 
