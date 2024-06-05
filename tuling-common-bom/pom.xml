@@ -6,7 +6,7 @@
 
     <packaging>pom</packaging>
     <groupId>com.tuling</groupId>
-    <version>1.0.0</version>
+    <version>${revision}</version>
     <artifactId>tuling-common-bom</artifactId>
 
     <modelVersion>4.0.0</modelVersion>
