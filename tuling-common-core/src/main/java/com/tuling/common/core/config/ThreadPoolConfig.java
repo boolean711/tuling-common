@@ -1,4 +1,4 @@
-package com.tuling.common.web.config;
+package com.tuling.common.core.config;
 
 
 import org.springframework.context.annotation.Bean;
@@ -16,7 +16,7 @@ public class ThreadPoolConfig {
         executor.setCorePoolSize(corePoolSize);
         executor.setMaxPoolSize(corePoolSize); // 可以根据需要设置最大线程数
         executor.setQueueCapacity(100); // 根据实际情况设置队列容量
-        executor.setThreadNamePrefix("ThreadPool-");
+        executor.setThreadNamePrefix("TuLingThreadPool-");
         executor.initialize();
         return executor;
     }
