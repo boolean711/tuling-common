@@ -7,15 +7,14 @@ import com.alibaba.excel.exception.ExcelDataConvertException;
 import com.alibaba.excel.metadata.CellExtra;
 import com.alibaba.excel.metadata.data.ReadCellData;
 import com.alibaba.excel.read.listener.ReadListener;
-import com.tuling.common.core.param.BaseExcelReadDto;
+import com.tuling.common.excel.param.BaseExcelReadDto;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicInteger;
+
 
 @Data
 @Slf4j
@@ -80,10 +79,13 @@ public abstract class BaseDataReadListener<READ extends BaseExcelReadDto> implem
         });
 
         completableFuture.thenAcceptAsync(res -> {
-            for (Map.Entry<Integer, String> entry : res.entrySet()) {
-                boolean success = StrUtil.isBlank(entry.getValue());
-                saveLog(new Log(entry.getKey(), entry.getValue(), success, new Date()));
+            if (CollectionUtil.isNotEmpty(res)){
+                for (Map.Entry<Integer, String> entry : res.entrySet()) {
+                    boolean success = StrUtil.isBlank(entry.getValue());
+                    saveLog(new Log(entry.getKey(), entry.getValue(), success, new Date()));
+                }
             }
+
         }, executor);
     }
 

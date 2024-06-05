@@ -1,4 +1,4 @@
-package com.tuling.common.core.param;
+package com.tuling.common.excel.param;
 
 import java.io.Serializable;
 
