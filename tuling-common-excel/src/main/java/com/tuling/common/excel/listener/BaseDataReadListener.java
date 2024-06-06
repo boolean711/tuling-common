@@ -10,20 +10,18 @@ import com.alibaba.excel.read.listener.ReadListener;
 import com.tuling.common.excel.param.BaseExcelReadDto;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
-
 
 @Data
 @Slf4j
 public abstract class BaseDataReadListener<READ extends BaseExcelReadDto> implements ReadListener<READ> {
 
     protected Object[] services;
-
     private final int maxSize = 50;
-
     private Executor executor;
 
     public BaseDataReadListener(Executor executor, Object... services) {
@@ -33,9 +31,7 @@ public abstract class BaseDataReadListener<READ extends BaseExcelReadDto> implem
 
     private List<READ> invokeList = new CopyOnWriteArrayList<>();
     private List<Log> logList = new CopyOnWriteArrayList<>();
-
-
-    private boolean hasNext = true;
+    private List<CompletableFuture< Map<Integer, String>>> futures = new ArrayList<>();
 
     @Override
     public void onException(Exception exception, AnalysisContext context) {
@@ -55,15 +51,14 @@ public abstract class BaseDataReadListener<READ extends BaseExcelReadDto> implem
 
     @Override
     public void invoke(READ data, AnalysisContext context) {
-        this.hasNext = hasNext(context);
-        CompletableFuture<Map<Integer, String>> completableFuture = CompletableFuture.supplyAsync(() -> {
+        CompletableFuture< Map<Integer, String>> future = CompletableFuture.supplyAsync(() -> {
             String error = checkData(data);
             Map<Integer, String> map = new HashMap<>();
             map.put(getRowIndex(context), error);
 
-            if(StrUtil.isBlank(error)){
+            if (StrUtil.isBlank(error)) {
                 invokeList.add(data);
-                if (!hasNext || invokeList.size() >= maxSize) {
+                if (invokeList.size() >= maxSize) {
                     doInvoke(new ArrayList<>(invokeList));
                     invokeList.clear();
                 }
@@ -77,16 +72,16 @@ public abstract class BaseDataReadListener<READ extends BaseExcelReadDto> implem
                 return res;
             }
         });
-
-        completableFuture.thenAcceptAsync(res -> {
-            if (CollectionUtil.isNotEmpty(res)){
+        future.thenAcceptAsync(res -> {
+            if (CollectionUtil.isNotEmpty(res)) {
                 for (Map.Entry<Integer, String> entry : res.entrySet()) {
                     boolean success = StrUtil.isBlank(entry.getValue());
                     saveLog(new Log(entry.getKey(), entry.getValue(), success, new Date()));
                 }
             }
-
         }, executor);
+
+        futures.add(future);
     }
 
     @Override
@@ -94,15 +89,32 @@ public abstract class BaseDataReadListener<READ extends BaseExcelReadDto> implem
         ReadListener.super.extra(extra, context);
     }
 
-
     @Override
     public boolean hasNext(AnalysisContext context) {
-        return ReadListener.super.hasNext(context);
+        return true;
     }
 
     @Override
     public void doAfterAllAnalysed(AnalysisContext context) {
         log.info("解析完所有数据===============");
+
+        // 等待所有异步操作完成
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        allFutures.join();
+
+        // 保存未达到阈值的数据
+        if (CollectionUtil.isNotEmpty(invokeList)) {
+            log.info("未达到阈值的数据===============");
+            doInvoke(new ArrayList<>(invokeList));
+            invokeList.clear();
+        }
+
+        // 保存未达到阈值的日志
+        if (CollectionUtil.isNotEmpty(logList)) {
+            log.info("未达到阈值的日志数据===============");
+            doSaveLog(new ArrayList<>(logList));
+            logList.clear();
+        }
     }
 
     protected abstract String checkData(READ data);
@@ -115,7 +127,7 @@ public abstract class BaseDataReadListener<READ extends BaseExcelReadDto> implem
 
     private void saveLog(Log log) {
         logList.add(log);
-        if (!hasNext || logList.size() >= maxSize) {
+        if (logList.size() >= maxSize) {
             doSaveLog(new ArrayList<>(logList));
             logList.clear();
         }
