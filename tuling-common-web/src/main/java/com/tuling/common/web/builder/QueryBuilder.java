@@ -8,10 +8,8 @@ import com.tuling.common.mybatis.param.ExpressionQueryDto;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class QueryBuilder {
 
@@ -89,9 +87,16 @@ public class QueryBuilder {
                         queryWrapper.like(fieldName, value);
                         break;
                     case IN:
-                        String[] values = StringUtils.split(value, ","); // 假设IN的值是逗号分隔的
-                        if (values != null && values.length > 0) {
-                            queryWrapper.in(fieldName, values);
+                        List<String> split = StrUtil.split(value, ",");
+
+                        if (split != null && split.size() > 0) {
+                            if (split.stream().allMatch(item -> item.equals("true") || item.equals("false"))) {
+                                List<Boolean> collect = split.stream().map(Boolean::parseBoolean).collect(Collectors.toList());
+                                queryWrapper.in(fieldName, collect);
+                            } else {
+                                queryWrapper.in(fieldName, split);
+                            }
+
                         }
 
                         break;
@@ -104,9 +109,9 @@ public class QueryBuilder {
                     case BETWEEN:
                         // BETWEEN操作需要两个值，假设value是由"和"分隔的两个值
                         if (StrUtil.isNotBlank(value)) {
-                            String[] betweenValues = StringUtils.split(value, ",");
-                            if (betweenValues != null && betweenValues.length == 2) {
-                                queryWrapper.between(fieldName, betweenValues[0], betweenValues[1]);
+                            List<String> betweenValues = StrUtil.split(value, ",");
+                            if (betweenValues != null && betweenValues.size() == 2) {
+                                queryWrapper.between(fieldName, betweenValues.get(0), betweenValues.get(1));
                             } else {
                                 throw new RuntimeException("非法参数");
                             }
