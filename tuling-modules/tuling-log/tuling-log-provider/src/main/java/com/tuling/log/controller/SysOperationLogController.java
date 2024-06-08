@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/log")
+@RequestMapping("/log/operation")
 @SaCheckPermission(PermissionConstants.ADMIN)
 public class SysOperationLogController extends CrudBaseController<SysOperationLogService,SysOperationLog, SysOperationLogVo, SysOperationLogSaveDto> {
 

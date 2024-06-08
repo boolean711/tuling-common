@@ -1,4 +1,4 @@
-package com.tuling.system.domain.vo;
+package com.tuling.log.domain.vo;
 
 
 import com.baomidou.mybatisplus.annotation.TableName;

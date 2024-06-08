@@ -1,14 +1,13 @@
-package com.tuling.system.domain.dto;
+package com.tuling.log.domain.entity;
 
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.tuling.common.core.param.BaseEntity;
-import com.tuling.common.core.param.BaseSaveDto;
 import lombok.Data;
 
 @Data
-
-public class SysUpdateLogSaveDto extends BaseSaveDto {
+@TableName("sys_update_log")
+public class SysUpdateLog extends BaseEntity {
 
 
   private String content;
