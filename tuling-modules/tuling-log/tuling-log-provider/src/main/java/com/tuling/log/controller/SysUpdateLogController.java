@@ -23,7 +23,8 @@ import java.util.List;
 public class SysUpdateLogController extends CrudBaseController<SysUpdateLogService,SysUpdateLog, SysUpdateLogVo, SysUpdateLogSaveDto>   {
 
     @Override
-    public ApiResponse<IPage<SysUpdateLogVo>> pageListByExpression(ExpressionQueryDto<SysUpdateLog> queryDto, HttpServletRequest servletRequest) {
+    @PostMapping("/pageListByExpression")
+    public ApiResponse<IPage<SysUpdateLogVo>> pageListByExpression(@RequestBody ExpressionQueryDto<SysUpdateLog> queryDto, HttpServletRequest servletRequest) {
         return super.pageListByExpression(queryDto, servletRequest);
     }
 
