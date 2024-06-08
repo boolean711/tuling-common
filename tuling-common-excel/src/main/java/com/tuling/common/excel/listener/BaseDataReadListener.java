@@ -83,6 +83,11 @@ public abstract class BaseDataReadListener<READ extends BaseExcelReadDto> implem
     @Override
     public void invokeHead(Map<Integer, ReadCellData<?>> headMap, AnalysisContext context) {
         ReadListener.super.invokeHead(headMap, context);
+        Integer approximateTotalRowNumber = context.readSheetHolder().getApproximateTotalRowNumber();
+        int corePoolSize = Runtime.getRuntime().availableProcessors() * 3;
+        if (approximateTotalRowNumber > corePoolSize * maxSize) {
+            throw new ServiceException("数量行数太多，请分批上传");
+        }
     }
 
     @Override
@@ -94,7 +99,7 @@ public abstract class BaseDataReadListener<READ extends BaseExcelReadDto> implem
         if (StrUtil.isBlank(error)) {
             invokeList.add(data);
             if (invokeList.size() >= maxSize) {
-                List<READ> readList=new ArrayList<>(invokeList);
+                List<READ> readList = new ArrayList<>(invokeList);
                 invokeList.clear();
                 CompletableFuture.runAsync(() -> {
                     doInvoke(readList);
@@ -150,14 +155,14 @@ public abstract class BaseDataReadListener<READ extends BaseExcelReadDto> implem
     private void saveLog(Log log) {
         logList.add(log);
         if (logList.size() >= maxSize) {
-            List<Log> saveLogList=new ArrayList<>(logList);
+            List<Log> saveLogList = new ArrayList<>(logList);
             logList.clear();
             CompletableFuture.runAsync(() -> {
                 doSaveLog(saveLogList);
 
             }, executor).handle((res, ex) -> {
                 if (ex != null) {
-                  doSaveLog(Collections.singletonList(new Log(log.getRowNum(), ex.getMessage(), false, new Date())));
+                    doSaveLog(Collections.singletonList(new Log(log.getRowNum(), ex.getMessage(), false, new Date())));
                 }
                 return res;
             });
