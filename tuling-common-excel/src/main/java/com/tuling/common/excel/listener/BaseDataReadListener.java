@@ -7,31 +7,67 @@ import com.alibaba.excel.exception.ExcelDataConvertException;
 import com.alibaba.excel.metadata.CellExtra;
 import com.alibaba.excel.metadata.data.ReadCellData;
 import com.alibaba.excel.read.listener.ReadListener;
+import com.tuling.common.core.exception.ServiceException;
 import com.tuling.common.excel.param.BaseExcelReadDto;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
-@Data
 @Slf4j
 public abstract class BaseDataReadListener<READ extends BaseExcelReadDto> implements ReadListener<READ> {
 
-    protected Object[] services;
-    private final int maxSize = 50;
+    protected List<Object> services = new ArrayList<>();
+    private int maxSize = 500;
     private Executor executor;
 
-    public BaseDataReadListener(Executor executor, Object... services) {
-        this.executor = executor;
-        this.services = services;
+    private List<READ> invokeList = new ArrayList<>();
+    private List<Log> logList = new ArrayList<>();
+
+    protected BaseDataReadListener(Builder<READ> builder) {
+        this.maxSize = builder.maxSize;
+        this.executor = builder.executor;
+        this.services = builder.services;
     }
 
-    private List<READ> invokeList = new CopyOnWriteArrayList<>();
-    private List<Log> logList = new CopyOnWriteArrayList<>();
-    private List<CompletableFuture< Map<Integer, String>>> futures = new ArrayList<>();
+    public static class Builder<READ extends BaseExcelReadDto> {
+        private int maxSize = 500;
+        private Executor executor;
+        private final List<Object> services = new ArrayList<>();
+        private final Class<? extends BaseDataReadListener<READ>> listenerClass;
+
+        public Builder(Class<? extends BaseDataReadListener<READ>> listenerClass) {
+            this.listenerClass = listenerClass;
+        }
+
+        public Builder<READ> setMaxSize(int maxSize) {
+            this.maxSize = maxSize;
+            return this;
+        }
+
+        public Builder<READ> setExecutor(Executor executor) {
+            this.executor = executor;
+            return this;
+        }
+
+        public Builder<READ> addService(Object service) {
+            this.services.add(service);
+            return this;
+        }
+
+        public BaseDataReadListener<READ> build() {
+            try {
+                Constructor<? extends BaseDataReadListener<READ>> declaredConstructor = listenerClass.getDeclaredConstructor(Builder.class);
+                declaredConstructor.setAccessible(true);
+                return declaredConstructor.newInstance(this);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to create listener instance", e);
+            }
+        }
+    }
 
     @Override
     public void onException(Exception exception, AnalysisContext context) {
@@ -51,37 +87,27 @@ public abstract class BaseDataReadListener<READ extends BaseExcelReadDto> implem
 
     @Override
     public void invoke(READ data, AnalysisContext context) {
-        CompletableFuture< Map<Integer, String>> future = CompletableFuture.supplyAsync(() -> {
-            String error = checkData(data);
-            Map<Integer, String> map = new HashMap<>();
-            map.put(getRowIndex(context), error);
+        if (executor == null) {
+            throw new ServiceException("未指定线程池==========");
+        }
+        String error = checkData(data);
+        if (StrUtil.isBlank(error)) {
+            invokeList.add(data);
+            if (invokeList.size() >= maxSize) {
+                List<READ> readList=new ArrayList<>(invokeList);
+                invokeList.clear();
+                CompletableFuture.runAsync(() -> {
+                    doInvoke(readList);
 
-            if (StrUtil.isBlank(error)) {
-                invokeList.add(data);
-                if (invokeList.size() >= maxSize) {
-                    doInvoke(new ArrayList<>(invokeList));
-                    invokeList.clear();
-                }
+                }, executor).handle((res, ex) -> {
+                    if (ex != null) {
+                        saveLog(new Log(getRowIndex(context), ex.getMessage(), false, new Date()));
+                    }
+                    return res;
+                });
             }
-            return map;
-        }, executor).handle((res, ex) -> {
-            if (ex != null) {
-                saveLog(new Log(getRowIndex(context), ex.getMessage(), false, new Date()));
-                return Collections.emptyMap();
-            } else {
-                return res;
-            }
-        });
-        future.thenAcceptAsync(res -> {
-            if (CollectionUtil.isNotEmpty(res)) {
-                for (Map.Entry<Integer, String> entry : res.entrySet()) {
-                    boolean success = StrUtil.isBlank(entry.getValue());
-                    saveLog(new Log(entry.getKey(), entry.getValue(), success, new Date()));
-                }
-            }
-        }, executor);
-
-        futures.add(future);
+        }
+        saveLog(new Log(getRowIndex(context), error, StrUtil.isBlank(error), new Date()));
     }
 
     @Override
@@ -97,10 +123,6 @@ public abstract class BaseDataReadListener<READ extends BaseExcelReadDto> implem
     @Override
     public void doAfterAllAnalysed(AnalysisContext context) {
         log.info("解析完所有数据===============");
-
-        // 等待所有异步操作完成
-        CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
-        allFutures.join();
 
         // 保存未达到阈值的数据
         if (CollectionUtil.isNotEmpty(invokeList)) {
@@ -128,8 +150,17 @@ public abstract class BaseDataReadListener<READ extends BaseExcelReadDto> implem
     private void saveLog(Log log) {
         logList.add(log);
         if (logList.size() >= maxSize) {
-            doSaveLog(new ArrayList<>(logList));
+            List<Log> saveLogList=new ArrayList<>(logList);
             logList.clear();
+            CompletableFuture.runAsync(() -> {
+                doSaveLog(saveLogList);
+
+            }, executor).handle((res, ex) -> {
+                if (ex != null) {
+                  doSaveLog(Collections.singletonList(new Log(log.getRowNum(), ex.getMessage(), false, new Date())));
+                }
+                return res;
+            });
         }
     }
 

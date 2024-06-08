@@ -41,22 +41,16 @@ public class CustomTenantLineHandler implements TenantLineHandler {
 
     @Override
     public boolean ignoreTable(String tableName) {
-        LoginUserDetails loginUser = LoginHelper.getCurrentLoginUser();
-        if (loginUser != null) {
-            if (loginUser.isAdmin()) {
-                return true;
-            }
-
-        }
         if (!tenantProperties.isEnable()) {
             return true;
         }
-
-
         if (!tenantProperties.getTableName().contains(tableName)) {
             return true;
         }
-
+        LoginUserDetails loginUser = LoginHelper.getCurrentLoginUser();
+        if (loginUser != null) {
+            return loginUser.isAdmin();
+        }
         return false;
     }
 }
