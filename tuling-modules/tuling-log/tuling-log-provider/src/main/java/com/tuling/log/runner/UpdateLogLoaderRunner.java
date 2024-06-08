@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -56,6 +57,7 @@ public class UpdateLogLoaderRunner implements CommandLineRunner {
                     sysUpdateLog.setVersion(version);
                     sysUpdateLog.setContent(content);
                     sysUpdateLog.setNeedInsertMetaData(false);
+                    sysUpdateLog.setCreateTime(new Date());
                     updateLogs.add(sysUpdateLog);
                 }
             }
