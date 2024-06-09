@@ -32,6 +32,7 @@ public class EncryptionService {
         String publicKeyBase64 = rsa.getPublicKeyBase64();
         String privateKeyBase64 = rsa.getPrivateKeyBase64();
 
+        log.info("设置私钥:{}",privateKeyBase64);
         // Store private key in Redis
         redisTemplate.opsForValue().set(String.format(RedisKeyPrefixConstants.PRIVATE_KEYB_ASE64, sessionId), privateKeyBase64);
 
