@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -34,7 +35,7 @@ public class EncryptionService {
 
 
         // Store private key in Redis
-        redisTemplate.opsForValue().set(String.format(RedisKeyPrefixConstants.PRIVATE_KEYB_ASE64, sessionId), privateKeyBase64);
+        redisTemplate.opsForValue().set(String.format(RedisKeyPrefixConstants.PRIVATE_KEYB_ASE64, sessionId), privateKeyBase64,1, TimeUnit.MINUTES);
         log.info("设置私钥:{}",privateKeyBase64);
         // Return public key as Base64 encoded string
         return publicKeyBase64;
