@@ -8,13 +8,13 @@ import com.tuling.common.satoken.utils.LoginHelper;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 
-public class CustomTenantLineHandler implements TenantLineHandler {
+public class TuLingTenantLineHandler implements TenantLineHandler {
     private final String TENANT_COLUMN = "tenant_id";
 
 
     private TenantProperties tenantProperties;
 
-    public CustomTenantLineHandler(TenantProperties tenantProperties) {
+    public TuLingTenantLineHandler(TenantProperties tenantProperties) {
         this.tenantProperties = tenantProperties;
     }
 

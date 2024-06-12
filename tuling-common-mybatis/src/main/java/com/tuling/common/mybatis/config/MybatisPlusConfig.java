@@ -11,7 +11,7 @@ import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInt
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
 import com.tuling.common.core.properties.TenantProperties;
-import com.tuling.common.mybatis.handler.CustomTenantLineHandler;
+import com.tuling.common.mybatis.handler.TuLingTenantLineHandler;
 import com.tuling.common.mybatis.handler.InjectionMetaObjectHandler;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +53,7 @@ public class MybatisPlusConfig {
 
 
     public TenantLineInnerInterceptor tenantLineInnerInterceptor() {
-        return new TenantLineInnerInterceptor(new CustomTenantLineHandler(tenantProperties));
+        return new TenantLineInnerInterceptor(new TuLingTenantLineHandler(tenantProperties));
     }
 
     /**
