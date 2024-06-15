@@ -80,26 +80,26 @@ public class InjectionMetaObjectHandler implements MetaObjectHandler {
     }
 
     private void fillUpdate(MetaObject metaObject, LoginUserDetails loginUser, Date now) {
-        if (metaObject.hasSetter("updateTime") && getFieldValByName("updateTime", metaObject) == null) {
+        if (metaObject.hasSetter("updateTime") ) {
             this.strictInsertFill(metaObject, "updateTime", Date.class, now);
         }
-        if (metaObject.hasSetter("updateName") && getFieldValByName("updateName", metaObject) == null) {
+        if (metaObject.hasSetter("updateName")) {
             this.strictInsertFill(metaObject, "updateName", String.class, loginUser.getNickName());
         }
-        if (metaObject.hasSetter("updateId") && getFieldValByName("updateId", metaObject) == null) {
+        if (metaObject.hasSetter("updateId") ) {
             this.strictInsertFill(metaObject, "updateId", Long.class, loginUser.getId());
         }
     }
 
     private void insertFillCreate(MetaObject metaObject, LoginUserDetails loginUser, Date now) {
 
-        if (metaObject.hasSetter("createTime") && getFieldValByName("createTime", metaObject) == null) {
+        if (metaObject.hasSetter("createTime")) {
             this.strictInsertFill(metaObject, "createTime", Date.class, now);
         }
-        if (metaObject.hasSetter("createName") && getFieldValByName("createName", metaObject) == null) {
+        if (metaObject.hasSetter("createName")) {
             this.strictInsertFill(metaObject, "createName", String.class, loginUser.getNickName());
         }
-        if (metaObject.hasSetter("createId") && getFieldValByName("createId", metaObject) == null) {
+        if (metaObject.hasSetter("createId") ) {
             this.strictInsertFill(metaObject, "createId", Long.class, loginUser.getId());
         }
     }
@@ -121,11 +121,6 @@ public class InjectionMetaObjectHandler implements MetaObjectHandler {
 
 
     }
-    private  void printCurrentStackTrace() {
-        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-        for (StackTraceElement element : stackTraceElements) {
-            log.info("element:{}",element.toString());
-        }
-    }
+
 
 }
