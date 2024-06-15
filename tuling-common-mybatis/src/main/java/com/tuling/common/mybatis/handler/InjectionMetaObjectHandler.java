@@ -81,13 +81,13 @@ public class InjectionMetaObjectHandler implements MetaObjectHandler {
 
     private void fillUpdate(MetaObject metaObject, LoginUserDetails loginUser, Date now) {
         if (metaObject.hasSetter("updateTime") ) {
-            this.strictInsertFill(metaObject, "updateTime", Date.class, now);
+            this.setFieldValByName( "updateTime",  now,metaObject);
         }
         if (metaObject.hasSetter("updateName")) {
-            this.strictInsertFill(metaObject, "updateName", String.class, loginUser.getNickName());
+            this.setFieldValByName( "updateName",  loginUser.getNickName(),metaObject);
         }
         if (metaObject.hasSetter("updateId") ) {
-            this.strictInsertFill(metaObject, "updateId", Long.class, loginUser.getId());
+            this.setFieldValByName( "updateId",  loginUser.getId(),metaObject);
         }
     }
 
