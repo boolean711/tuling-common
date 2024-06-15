@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 
 public interface SmsService {
 
-    int SEND_MAX_TIMES_ONE_DAY = 5;
 
     String PHONE_NUM_TIMES_REDIS_PREFIX = "phoneNumTimes:%s";
 
@@ -25,6 +24,9 @@ public interface SmsService {
             throw new ServiceException("手机号码格式不正确");
 
         }
+        Integer sendCodeMaxTimesOfDay = SpringUtils.getProperty("sms.sendCodeMaxTimesOfDay",Integer.class,5);
+
+
         RedisTemplate<String, Object> redisTemplate = SpringUtils.getBean("jacksonRedisTemplate");
 
         if (Boolean.TRUE.equals(redisTemplate.hasKey(codeKey))) {
@@ -37,7 +39,7 @@ public interface SmsService {
             sendCount = 0;
         }
 
-        if (sendCount >= SEND_MAX_TIMES_ONE_DAY) {
+        if (sendCount >= sendCodeMaxTimesOfDay) {
             throw new ServiceException(String.format("手机号码：%s当天发送次数过多", phoneNum));
         }
 
