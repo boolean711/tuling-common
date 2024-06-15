@@ -29,4 +29,6 @@ public class AuthSaTokenInterceptorArgs implements ISaTokenInterceptorArgs {
         res.put(0, Collections.singletonList(StpUtil::checkLogin));
         return res;
     }
+
+
 }
