@@ -13,8 +13,8 @@ import static me.chanjar.weixin.common.api.WxConsts.EventType;
 /**
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
-@Component
-public class MenuHandler extends AbstractHandler {
+
+public abstract class MenuHandler extends AbstractHandler {
 
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage,

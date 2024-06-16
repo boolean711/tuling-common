@@ -11,8 +11,8 @@ import java.util.Map;
 /**
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
-@Component
-public class KfSessionHandler extends AbstractHandler {
+
+public  abstract  class KfSessionHandler extends AbstractHandler {
 
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage,

@@ -30,25 +30,36 @@ import static me.chanjar.weixin.mp.constant.WxMpEventConstants.POI_CHECK_NOTIFY;
  *
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
-@AllArgsConstructor
+
 @Configuration
 @EnableConfigurationProperties(WxMpProperties.class)
 public class WxMpConfiguration {
-    private final LogHandler logHandler;
-    private final NullHandler nullHandler;
-    private final KfSessionHandler kfSessionHandler;
-    private final StoreCheckNotifyHandler storeCheckNotifyHandler;
-    private final LocationHandler locationHandler;
-    private final MenuHandler menuHandler;
-    private final MsgHandler msgHandler;
-    private final UnsubscribeHandler unsubscribeHandler;
-    private final SubscribeHandler subscribeHandler;
-    private final ScanHandler scanHandler;
-    private final WxMpProperties properties;
+
+    @Autowired(required = false)
+    private  LogHandler logHandler;
+    @Autowired(required = false)
+    private  NullHandler nullHandler;
+    @Autowired(required = false)
+    private  KfSessionHandler kfSessionHandler;
+    @Autowired(required = false)
+    private  StoreCheckNotifyHandler storeCheckNotifyHandler;
+    @Autowired(required = false)
+    private  LocationHandler locationHandler;
+    @Autowired(required = false)
+    private  MenuHandler menuHandler;
+    @Autowired(required = false)
+    private  MsgHandler msgHandler;
+    @Autowired(required = false)
+    private  UnsubscribeHandler unsubscribeHandler;
+    @Autowired(required = false)
+    private  SubscribeHandler subscribeHandler;
+    @Autowired(required = false)
+    private  ScanHandler scanHandler;
 
     @Autowired
-
-    private StringRedisTemplate stringRedisTemplate;
+    private  WxMpProperties properties;
+    @Autowired
+    private  StringRedisTemplate stringRedisTemplate;
 
 
     @Bean
@@ -61,24 +72,20 @@ public class WxMpConfiguration {
 
         WxMpService service = new WxMpServiceImpl();
         service.setMultiConfigStorages(configs
-            .stream().map(a -> {
-                WxMpDefaultConfigImpl configStorage;
-                if (this.properties.isUseRedis()) {
-//                    final WxMpProperties.RedisConfig redisConfig = this.properties.getRedisConfig();
-//                    JedisPoolConfig poolConfig = new JedisPoolConfig();
-//                    JedisPool jedisPool = new JedisPool(poolConfig, redisConfig.getHost(), redisConfig.getPort(),
-//                        redisConfig.getTimeout(), redisConfig.getPassword());
-                    configStorage = new WxMpRedisConfigImpl(new RedisTemplateWxRedisOps(stringRedisTemplate), a.getAppId());
-                } else {
-                    configStorage = new WxMpDefaultConfigImpl();
-                }
+                .stream().map(a -> {
+                    WxMpDefaultConfigImpl configStorage;
+                    if (this.properties.isUseRedis()) {
+                        configStorage = new WxMpRedisConfigImpl(new RedisTemplateWxRedisOps(stringRedisTemplate), a.getAppId());
+                    } else {
+                        configStorage = new WxMpDefaultConfigImpl();
+                    }
 
-                configStorage.setAppId(a.getAppId());
-                configStorage.setSecret(a.getSecret());
-                configStorage.setToken(a.getToken());
-                configStorage.setAesKey(a.getAesKey());
-                return configStorage;
-            }).collect(Collectors.toMap(WxMpDefaultConfigImpl::getAppId, a -> a, (o, n) -> o)));
+                    configStorage.setAppId(a.getAppId());
+                    configStorage.setSecret(a.getSecret());
+                    configStorage.setToken(a.getToken());
+                    configStorage.setAesKey(a.getAesKey());
+                    return configStorage;
+                }).collect(Collectors.toMap(WxMpDefaultConfigImpl::getAppId, a -> a, (o, n) -> o)));
         return service;
     }
 
@@ -86,43 +93,67 @@ public class WxMpConfiguration {
     public WxMpMessageRouter messageRouter(WxMpService wxMpService) {
         final WxMpMessageRouter newRouter = new WxMpMessageRouter(wxMpService);
 
-        // 记录所有事件的日志 （异步执行）
-        newRouter.rule().handler(this.logHandler).next();
+        if (this.locationHandler != null) {
+            // 记录所有事件的日志 （异步执行）
+            newRouter.rule().handler(this.logHandler).next();
+        }
 
-        // 接收客服会话管理事件
-        newRouter.rule().async(false).msgType(EVENT).event(KF_CREATE_SESSION)
-            .handler(this.kfSessionHandler).end();
-        newRouter.rule().async(false).msgType(EVENT).event(KF_CLOSE_SESSION)
-            .handler(this.kfSessionHandler).end();
-        newRouter.rule().async(false).msgType(EVENT).event(KF_SWITCH_SESSION)
-            .handler(this.kfSessionHandler).end();
+
+        if (this.kfSessionHandler != null) {
+            // 接收客服会话管理事件
+            newRouter.rule().async(false).msgType(EVENT).event(KF_CREATE_SESSION)
+                    .handler(this.kfSessionHandler).end();
+            newRouter.rule().async(false).msgType(EVENT).event(KF_CLOSE_SESSION)
+                    .handler(this.kfSessionHandler).end();
+            newRouter.rule().async(false).msgType(EVENT).event(KF_SWITCH_SESSION)
+                    .handler(this.kfSessionHandler).end();
+
+        }
 
         // 门店审核事件
-        newRouter.rule().async(false).msgType(EVENT).event(POI_CHECK_NOTIFY).handler(this.storeCheckNotifyHandler).end();
+        if (storeCheckNotifyHandler != null) {
+            newRouter.rule().async(false).msgType(EVENT).event(POI_CHECK_NOTIFY).handler(this.storeCheckNotifyHandler).end();
+        }
+
 
         // 自定义菜单事件
-        newRouter.rule().async(false).msgType(EVENT).event(EventType.CLICK).handler(this.menuHandler).end();
+        if (this.menuHandler != null) {
+            newRouter.rule().async(false).msgType(EVENT).event(EventType.CLICK).handler(this.menuHandler).end();
+        }
 
-        // 点击菜单连接事件
-        newRouter.rule().async(false).msgType(EVENT).event(EventType.VIEW).handler(this.nullHandler).end();
+
+        if (this.nullHandler != null) {
+            // 点击菜单连接事件
+            newRouter.rule().async(false).msgType(EVENT).event(EventType.VIEW).handler(this.nullHandler).end();
+
+        }
 
         // 关注事件
-        newRouter.rule().async(false).msgType(EVENT).event(SUBSCRIBE).handler(this.subscribeHandler).end();
+        if (this.subscribeHandler != null) {
+            newRouter.rule().async(false).msgType(EVENT).event(SUBSCRIBE).handler(this.subscribeHandler).end();
+        }
 
         // 取消关注事件
-        newRouter.rule().async(false).msgType(EVENT).event(UNSUBSCRIBE).handler(this.unsubscribeHandler).end();
+        if (this.unsubscribeHandler != null) {
+            newRouter.rule().async(false).msgType(EVENT).event(UNSUBSCRIBE).handler(this.unsubscribeHandler).end();
+        }
 
         // 上报地理位置事件
-        newRouter.rule().async(false).msgType(EVENT).event(EventType.LOCATION).handler(this.locationHandler).end();
-
-        // 接收地理位置消息
-        newRouter.rule().async(false).msgType(XmlMsgType.LOCATION).handler(this.locationHandler).end();
+        if (this.locationHandler != null) {
+            newRouter.rule().async(false).msgType(EVENT).event(EventType.LOCATION).handler(this.locationHandler).end();
+            // 接收地理位置消息
+            newRouter.rule().async(false).msgType(XmlMsgType.LOCATION).handler(this.locationHandler).end();
+        }
 
         // 扫码事件
-        newRouter.rule().async(false).msgType(EVENT).event(EventType.SCAN).handler(this.scanHandler).end();
-
+        if (this.scanHandler != null) {
+            newRouter.rule().async(false).msgType(EVENT).event(EventType.SCAN).handler(this.scanHandler).end();
+        }
         // 默认
-        newRouter.rule().async(false).handler(this.msgHandler).end();
+        if (this.msgHandler != null) {
+            newRouter.rule().async(false).handler(this.msgHandler).end();
+        }
+
 
         return newRouter;
     }

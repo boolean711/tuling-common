@@ -13,8 +13,8 @@ import java.util.Map;
  *
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
-@Component
-public class StoreCheckNotifyHandler extends AbstractHandler {
+
+public  abstract class StoreCheckNotifyHandler extends AbstractHandler {
 
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage,

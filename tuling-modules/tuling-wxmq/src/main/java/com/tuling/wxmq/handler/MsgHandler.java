@@ -17,8 +17,7 @@ import static me.chanjar.weixin.common.api.WxConsts.XmlMsgType;
 /**
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
-@Component
-public class MsgHandler extends AbstractHandler {
+public abstract class MsgHandler extends AbstractHandler {
 
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage,

@@ -12,8 +12,8 @@ import java.util.Map;
 /**
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
-@Component
-public class LogHandler extends AbstractHandler {
+
+public abstract class LogHandler extends AbstractHandler {
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage,
                                     Map<String, Object> context, WxMpService wxMpService,

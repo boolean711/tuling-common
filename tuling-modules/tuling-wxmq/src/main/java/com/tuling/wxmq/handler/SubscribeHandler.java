@@ -14,8 +14,8 @@ import java.util.Map;
 /**
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
-@Component
-public class SubscribeHandler extends AbstractHandler {
+
+public abstract class SubscribeHandler extends AbstractHandler {
 
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage,
