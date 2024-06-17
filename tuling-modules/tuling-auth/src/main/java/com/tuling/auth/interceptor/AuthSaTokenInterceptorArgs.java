@@ -11,8 +11,6 @@ import java.util.*;
 public class AuthSaTokenInterceptorArgs implements ISaTokenInterceptorArgs {
 
 
-
-
     @Override
     public String[] matchArgs() {
         return new String[]{"/**"};
@@ -20,7 +18,7 @@ public class AuthSaTokenInterceptorArgs implements ISaTokenInterceptorArgs {
 
     @Override
     public String[] notMatchAras() {
-        return new String[]{"/auth/doLogin", "/auth/logout","/auth/verifyIntelligentCaptcha"};
+        return new String[]{"/auth/doLogin", "/auth/logout", "/auth/verifyIntelligentCaptcha", "/auth/doLoginByPhoneNumCode", "/auth/sendLoginPhoneNumCode"};
     }
 
     @Override

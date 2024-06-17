@@ -12,4 +12,5 @@ public interface LoginService {
     void updatePassword(UpdatePasswordDto dto);
 
 
+    UserLoginVo doLoginByPhoneNumCode(String phoneNum, String code,Long tenantId);
 }

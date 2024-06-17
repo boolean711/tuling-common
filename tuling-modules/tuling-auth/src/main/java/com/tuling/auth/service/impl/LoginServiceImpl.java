@@ -9,17 +9,17 @@ import com.aliyun.captcha20230305.models.VerifyIntelligentCaptchaRequest;
 import com.aliyun.captcha20230305.models.VerifyIntelligentCaptchaResponse;
 import com.aliyun.captcha20230305.models.VerifyIntelligentCaptchaResponseBody;
 
-import com.aliyun.teaopenapi.models.Config;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.tuling.auth.constants.RedisKeyPrefixConstants;
 import com.tuling.auth.domain.dto.UpdatePasswordDto;
 import com.tuling.auth.domain.dto.UserLoginDto;
 import com.tuling.auth.domain.vo.UserLoginVo;
 import com.tuling.auth.service.LoginService;
 import com.tuling.common.core.exception.ServiceException;
-import com.tuling.common.core.param.ApiResponse;
 import com.tuling.common.core.properties.TenantProperties;
 import com.tuling.common.satoken.param.LoginUserDetails;
 import com.tuling.common.satoken.utils.LoginHelper;
+import com.tuling.common.sms.service.SmsService;
 import com.tuling.common.utils.IpUtil;
 import com.tuling.security.service.EncryptionService;
 import com.tuling.system.constants.RedisPrefixKey;
@@ -38,7 +38,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -80,6 +79,9 @@ public class LoginServiceImpl implements LoginService {
 
     @Autowired
     private EncryptionService encryptionService;
+
+    @Autowired
+    private SmsService smsService;
 
     @Override
     public UserLoginVo loginByPassword(UserLoginDto loginDto) {
@@ -149,6 +151,29 @@ public class LoginServiceImpl implements LoginService {
         userService.updateById(sysUser);
         StpUtil.logout();
 
+    }
+
+    @Override
+    public UserLoginVo doLoginByPhoneNumCode(String phoneNum, String code, Long tenantId) {
+        if (!smsService.checkPhoneNumCode(String.format(RedisKeyPrefixConstants.LOGIN_PHONE_NUM_CODE_PREFIX, phoneNum), code)) {
+            throw new ServiceException("验证码不正确");
+        }
+        UserLoginVo userLoginVo = new UserLoginVo();
+
+        List<SysUserVo> userVoList = userService.getUserByUsername(phoneNum, tenantId);
+        SysUserVo userByUsername = userVoList.get(0);
+        setRoleList(userByUsername);
+        setUserPermissions(userByUsername);
+        setTenantVo(userByUsername);
+        TlLoginUser loginUser = new TlLoginUser(userByUsername);
+        if (checkTenantValid(loginUser, userByUsername)) {
+            String s = loginUserAndReturnToken(loginUser, userByUsername);
+
+            userLoginVo.setToken(s);
+            return userLoginVo;
+        }
+
+        throw new ServiceException("租户已到期，请联系管理员");
     }
 
     public VerifyIntelligentCaptchaResponseBody verifyIntelligentCaptcha(String sceneId, String captchaVerifyParam) {
