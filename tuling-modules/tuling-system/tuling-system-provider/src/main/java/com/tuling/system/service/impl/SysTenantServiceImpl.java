@@ -82,6 +82,7 @@ public class SysTenantServiceImpl
             eventPublisher.publishEvent(new AfterSaveTenantEvent(this, entity.getId()));
         }
 
+        tenantPackageService.resetTenantAdminRoleMenus(entity.getPackageId());
 
     }
 

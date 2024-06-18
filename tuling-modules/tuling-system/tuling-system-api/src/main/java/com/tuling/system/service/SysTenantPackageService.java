@@ -12,6 +12,6 @@ import lombok.Data;
 public interface SysTenantPackageService extends CrudBaseIService<SysTenantPackage,SysTenantPackageVo,SysTenantPackageSaveDto> {
 
 
-
+  void   resetTenantAdminRoleMenus(Long id);
 
 }

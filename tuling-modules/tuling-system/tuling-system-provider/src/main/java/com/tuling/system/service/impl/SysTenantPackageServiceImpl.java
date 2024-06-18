@@ -38,6 +38,22 @@ public class SysTenantPackageServiceImpl extends CrudBaseServiceImpl<SysTenantPa
     public void afterSave(SysTenantPackageSaveDto dto, SysTenantPackage entity) {
         //租户套餐修改后，所有租户管理员绑定菜单关系需要重置
 
+
+        this.resetTenantAdminRoleMenus(entity);
+    }
+
+    @Override
+    public void resetTenantAdminRoleMenus(Long id) {
+        SysTenantPackage tenantPackage = this.getById(id);
+
+        if (tenantPackage != null) {
+            this.resetTenantAdminRoleMenus(tenantPackage);
+        }
+
+
+    }
+
+    public void resetTenantAdminRoleMenus(SysTenantPackage entity) {
         List<Long> tenantAdminRoleIds = roleMapper.selectTenantAdminRoleIdByPackageId(entity.getId());
 
         if (CollectionUtils.isNotEmpty(tenantAdminRoleIds)) {
@@ -56,8 +72,6 @@ public class SysTenantPackageServiceImpl extends CrudBaseServiceImpl<SysTenantPa
 
             roleMenuRelService.saveBatch(roleMenuRelList);
         }
-
-
 
     }
 }
