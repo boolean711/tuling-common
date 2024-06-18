@@ -86,7 +86,7 @@ public class AuthController {
         String noticeTemplateId = tencentCloudProperties.getTemplateId().get("smsCode");
 
         String codeKey = String.format(RedisKeyPrefixConstants.LOGIN_PHONE_NUM_CODE_PREFIX, phoneNum);
-        return ApiResponse.success(smsService.sendPhoneNumCode(codeKey, phoneNum, RandomUtil.randomNumbers(6), noticeTemplateId));
+        return ApiResponse.success(smsService.sendPhoneNumCode(codeKey, phoneNum, RandomUtil.randomNumbers(6), noticeTemplateId)).setMessage("发送成功");
     }
 
 

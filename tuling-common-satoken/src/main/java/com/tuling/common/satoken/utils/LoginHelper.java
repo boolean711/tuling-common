@@ -6,6 +6,7 @@ import cn.dev33.satoken.context.model.SaStorage;
 import cn.dev33.satoken.dao.SaSessionForJacksonCustomized;
 import cn.dev33.satoken.dao.SaTokenDao;
 import cn.dev33.satoken.session.SaSession;
+import cn.dev33.satoken.session.TokenSign;
 import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -58,7 +59,6 @@ public class LoginHelper {
 
         SaSession session = StpUtil.getSession();
         session.updateTimeout(model.getTimeout());
-
         session.set(LOGIN_USER_SESSION_EXTRA_KEY, loginUser);
 
     }
