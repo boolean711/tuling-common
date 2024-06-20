@@ -29,4 +29,5 @@ public class SysTenantSaveDto extends BaseSaveDto {
 
     private Integer renewMonthNum;
     private Integer textMessageQty;
+    private Boolean indefinite;
 }

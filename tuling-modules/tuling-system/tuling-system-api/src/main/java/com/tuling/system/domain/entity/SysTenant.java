@@ -25,6 +25,6 @@ public class SysTenant extends BaseEntity {
 
 
     private Long packageId;
-
+    private Boolean indefinite;
 
 }
