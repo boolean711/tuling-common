@@ -19,7 +19,7 @@ public class WxMqSaTokenInterceptorArgs implements ISaTokenInterceptorArgs {
 
     @Override
     public String[] notMatchAras() {
-        return new String[]{"/wx/**"};
+        return new String[]{"/wx/portal/**"};
     }
 
     @Override
