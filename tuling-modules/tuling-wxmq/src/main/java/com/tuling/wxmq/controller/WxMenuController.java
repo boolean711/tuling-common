@@ -1,5 +1,7 @@
 package com.tuling.wxmq.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.tuling.common.core.constants.PermissionConstants;
 import lombok.AllArgsConstructor;
 import me.chanjar.weixin.common.api.WxConsts;
 import me.chanjar.weixin.common.bean.menu.WxMenu;
@@ -25,6 +27,7 @@ import static me.chanjar.weixin.common.api.WxConsts.MenuButtonType;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/wx/menu/{appid}")
+@SaCheckPermission(PermissionConstants.ADMIN)
 public class WxMenuController {
     @Autowired
     private final WxMpService wxService;
