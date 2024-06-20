@@ -133,9 +133,6 @@ public class TlLoginUser implements LoginUserDetails {
 
 
             if (tenantVo != null) {
-                if (tenantVo.getIndefinite()){
-                    return true;
-                }
                 SysTenantService tenantService = SpringUtils.getBean(SysTenantService.class);
                 return tenantService.isTenantValid(tenantVo.getId());
             }

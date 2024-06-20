@@ -21,6 +21,9 @@ public interface SysTenantService extends CrudBaseIService<SysTenant, SysTenantV
 
         SysTenantVo tenantVo = this.getInfoById(id);
         if (tenantVo != null) {
+            if (tenantVo.getIndefinite()){
+                return true;
+            }
             Date validTime = tenantVo.getValidTime();
 
             return validTime != null && validTime.after(new Date());
