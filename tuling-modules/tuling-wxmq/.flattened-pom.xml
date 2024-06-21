@@ -14,4 +14,10 @@
     <maven.compiler.source>8</maven.compiler.source>
     <maven.compiler.target>8</maven.compiler.target>
   </properties>
+  <dependencies>
+    <dependency>
+      <groupId>com.tuling</groupId>
+      <artifactId>tuling-log-api</artifactId>
+    </dependency>
+  </dependencies>
 </project>
