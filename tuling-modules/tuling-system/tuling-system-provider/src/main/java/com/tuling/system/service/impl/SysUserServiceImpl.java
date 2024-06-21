@@ -67,7 +67,7 @@ public class SysUserServiceImpl
     public void beforeSave(SysUserSaveDto dto) {
 
         checkTenant(dto.getTenantId());
-        checkRole(dto.getRoleIds());
+        checkRole(dto);
         checkUserNamePassword(dto);
         if (dto.getId() == null) {
             dto.setCode(codeRuleService.generateCode(CodeRuleConstants.USER_CODE_PREFIX));
@@ -111,6 +111,8 @@ public class SysUserServiceImpl
 
     @Override
     public void afterSave(SysUserSaveDto dto, SysUser entity) {
+
+
         if (!dto.isUpdateSelf()) {
             List<SysUserRoleRel> relList = new ArrayList<>();
 
@@ -248,13 +250,31 @@ public class SysUserServiceImpl
     }
 
 
-    private void checkRole(List<Long> roleIds) {
+    private void checkRole(SysUserSaveDto userSaveDto) {
 
         if (!LoginHelper.isAdmin()) {
-            for (Long roleId : roleIds) {
+            for (Long roleId : userSaveDto.getRoleIds()) {
                 if (permissionService.isGivenPermissionByRoleId(roleId, Collections.singletonList(PermissionConstants.ADMIN))) {
                     throw new ServiceException("异常角色绑定");
                 }
+            }
+            if (userSaveDto.getId() != null) {
+                List<SysRoleVo> roleListByUserId = roleService.getRoleListByUserId(userSaveDto.getId());
+                boolean isTenantAdmin = false;
+                Long tenantAdminRoleId = null;
+                for (SysRoleVo roleVo : roleListByUserId) {
+                    if (permissionService.isGivenPermissionByRoleId(roleVo.getId(), Collections.singletonList(PermissionConstants.TENANT_ADMIN))) {
+                        isTenantAdmin = true;
+                        tenantAdminRoleId = roleVo.getId();
+                        break;
+                    }
+                }
+                if (isTenantAdmin){
+                    if (!userSaveDto.getRoleIds().contains(tenantAdminRoleId)) {
+                        throw new ServiceException("租户管理员角色无法修改");
+                    }
+                }
+
             }
         }
 
@@ -281,6 +301,18 @@ public class SysUserServiceImpl
             if (StrUtil.isNotBlank(dto.getPassword())) {
                 throw new ServiceException("不允许修改密码");
             }
+
+            //非超级管理员不允许修改账号
+            if (!LoginHelper.isAdmin()) {
+
+                SysUser oldUser = this.getById(dto.getId());
+
+                if (!dto.getUsername().equals(oldUser.getUsername())) {
+                    throw new ServiceException("不允许修改手机号码和用户名");
+                }
+
+            }
+
         }
 
         LambdaQueryWrapper<SysUser> lqw = new LambdaQueryWrapper<>();

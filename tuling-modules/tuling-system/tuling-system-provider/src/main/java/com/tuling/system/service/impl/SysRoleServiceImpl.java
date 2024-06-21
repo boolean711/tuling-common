@@ -2,9 +2,11 @@ package com.tuling.system.service.impl;
 
 
 import cn.hutool.extra.spring.SpringUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.tuling.common.core.constants.PermissionConstants;
 import com.tuling.common.core.exception.ServiceException;
+import com.tuling.common.satoken.utils.LoginHelper;
 import com.tuling.common.web.service.CrudBaseServiceImpl;
 import com.tuling.system.domain.dto.SysRoleSaveDto;
 import com.tuling.system.domain.entity.SysRole;
@@ -50,7 +52,7 @@ public class SysRoleServiceImpl extends CrudBaseServiceImpl<SysRole, SysRoleVo, 
     @Override
     public void beforeSave(SysRoleSaveDto dto) {
         if (dto.getId() != null) {
-            if (permissionService.isGivenPermissionByRoleId(dto.getId(), Arrays.asList(PermissionConstants.TENANT_ADMIN,PermissionConstants.ADMIN))) {
+            if (!LoginHelper.isAdmin()&&permissionService.isGivenPermissionByRoleId(dto.getId(), Arrays.asList(PermissionConstants.TENANT_ADMIN,PermissionConstants.ADMIN))) {
                 throw new ServiceException("管理员角色无法修改");
             }
             roleMenuRelService.removeByRoleId(Collections.singletonList(dto.getId()));
