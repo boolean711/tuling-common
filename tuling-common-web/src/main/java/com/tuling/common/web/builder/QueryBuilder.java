@@ -3,6 +3,7 @@ package com.tuling.common.web.builder;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
+import com.baomidou.mybatisplus.core.toolkit.sql.SqlInjectionUtils;
 import com.tuling.common.core.param.BaseEntity;
 import com.tuling.common.mybatis.param.ExpressionQueryDto;
 import org.springframework.util.StringUtils;
@@ -133,6 +134,9 @@ public class QueryBuilder {
     }
 
     private static <E> boolean isFieldPresentInClass(Class<E> entityClass, String fieldName) {
+        if (SqlInjectionUtils.check(fieldName)) {
+            return false;
+        }
         // 存储实体类及其所有父类的字段名
         Set<String> fieldNames = new HashSet<>();
 
