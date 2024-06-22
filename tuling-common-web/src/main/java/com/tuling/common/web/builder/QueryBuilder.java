@@ -88,17 +88,20 @@ public class QueryBuilder {
                         queryWrapper.like(fieldName, value);
                         break;
                     case IN:
-                        List<String> split = StrUtil.split(value, ",");
+                        if (StrUtil.isNotBlank(value)) {
+                            List<String> split = StrUtil.split(value, ",");
 
-                        if (split != null && split.size() > 0) {
-                            if (split.stream().allMatch(item -> item.equals("true") || item.equals("false"))) {
-                                List<Boolean> collect = split.stream().map(Boolean::parseBoolean).collect(Collectors.toList());
-                                queryWrapper.in(fieldName, collect);
-                            } else {
-                                queryWrapper.in(fieldName, split);
+                            if (split != null && split.size() > 0) {
+                                if (split.stream().allMatch(item -> item.equals("true") || item.equals("false"))) {
+                                    List<Boolean> collect = split.stream().map(Boolean::parseBoolean).collect(Collectors.toList());
+                                    queryWrapper.in(fieldName, collect);
+                                } else {
+                                    queryWrapper.in(fieldName, split);
+                                }
+
                             }
-
                         }
+
 
                         break;
                     case LE:

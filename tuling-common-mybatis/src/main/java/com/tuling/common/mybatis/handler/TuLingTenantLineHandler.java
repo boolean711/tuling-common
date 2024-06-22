@@ -7,6 +7,9 @@ import com.tuling.common.satoken.param.LoginUserDetails;
 import com.tuling.common.satoken.utils.LoginHelper;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.schema.Column;
+
+import java.util.List;
 
 public class TuLingTenantLineHandler implements TenantLineHandler {
     private final String TENANT_COLUMN = "tenant_id";
@@ -41,6 +44,7 @@ public class TuLingTenantLineHandler implements TenantLineHandler {
 
     @Override
     public boolean ignoreTable(String tableName) {
+
         if (!tenantProperties.isEnable()) {
             return true;
         }
@@ -52,5 +56,12 @@ public class TuLingTenantLineHandler implements TenantLineHandler {
             return loginUser.isAdmin();
         }
         return false;
+
+
+    }
+
+    @Override
+    public boolean ignoreInsert(List<Column> columns, String tenantIdColumn) {
+        return TenantLineHandler.super.ignoreInsert(columns, tenantIdColumn);
     }
 }
