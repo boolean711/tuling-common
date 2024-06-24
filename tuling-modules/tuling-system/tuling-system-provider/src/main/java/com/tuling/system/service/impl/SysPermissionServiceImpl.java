@@ -40,8 +40,8 @@ public class SysPermissionServiceImpl
     @Override
     public void afterPageListByExpression(List<SysPermissionVo> records) {
         if (!LoginHelper.isAdmin()) {
-            // 非超级管理员过滤掉超级管理员权限
-            records.removeIf(item -> PermissionConstants.ADMIN.equals(item.getPermissionCode()));
+            // 非超级管理员过滤掉超级管理员和租户管理员权限
+            records.removeIf(item -> PermissionConstants.ADMIN.equals(item.getPermissionCode())||PermissionConstants.TENANT_ADMIN.equals(item.getPermissionCode()));
         }
 
     }
