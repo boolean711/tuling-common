@@ -14,6 +14,8 @@ public class SysRoleVo extends BaseVo {
   private String roleName;
   private Long permissionId;
   private String permissionName;
+
+  private String permissionCode;
   private Integer roleSort;
   private Boolean status;
   private String remark;

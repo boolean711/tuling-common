@@ -85,6 +85,10 @@ public class SysRoleServiceImpl extends CrudBaseServiceImpl<SysRole, SysRoleVo, 
 
     @Override
     public void afterPageListByExpression(List<SysRoleVo> records) {
+        if (!LoginHelper.isAdmin()){
+            records.removeIf(item->permissionService.isGivenPermissionByRoleId(item.getId(), Collections.singletonList(PermissionConstants.TENANT_ADMIN)));
+        }
+
         syncInfo(records);
     }
 
@@ -188,6 +192,7 @@ public class SysRoleServiceImpl extends CrudBaseServiceImpl<SysRole, SysRoleVo, 
             if (sysPermissionVo != null) {
                 record.setPermissionName(sysPermissionVo.getPermissionName());
                 record.setPermissionId(permissionId);
+                record.setPermissionCode(sysPermissionVo.getPermissionCode());
             }
             SysTenantVo tenantVo = tenantVoMap.get(record.getTenantId());
 
