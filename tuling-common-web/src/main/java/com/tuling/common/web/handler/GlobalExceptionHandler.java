@@ -46,7 +46,33 @@ public class GlobalExceptionHandler {
             return ApiResponse.error(((ServiceException) e).getCode(), e.getMessage());
         }
         if (e instanceof NotLoginException){
-           return ApiResponse.error(HttpStatus.HTTP_UNAUTHORIZED, "登录信息已失效，请重新登录");
+            NotLoginException notLoginException= (NotLoginException) e;
+            String message="";
+            if(notLoginException.getType().equals(NotLoginException.NOT_TOKEN)) {
+                message = "登录信息已失效，请重新登录";
+            }
+            else if(notLoginException.getType().equals(NotLoginException.INVALID_TOKEN)) {
+                message = "登录信息已失效，请重新登录";
+            }
+            else if(notLoginException.getType().equals(NotLoginException.TOKEN_TIMEOUT)) {
+                message = "长时间未操作，当前登录已退出，请重新登录";
+            }
+            else if(notLoginException.getType().equals(NotLoginException.BE_REPLACED)) {
+                message = "已在其他设备登录，当前会话已退出";
+            }
+            else if(notLoginException.getType().equals(NotLoginException.KICK_OUT)) {
+                message = "登录信息已失效";
+            }
+            else if(notLoginException.getType().equals(NotLoginException.TOKEN_FREEZE)) {
+                message = "登录信息已失效";
+            }
+            else if(notLoginException.getType().equals(NotLoginException.NO_PREFIX)) {
+                message = "登录信息无效，请重新登录";
+            }
+            else {
+                message = "登录信息已失效，请重新登录";
+            }
+           return ApiResponse.error(HttpStatus.HTTP_UNAUTHORIZED, message);
         }
         if (e instanceof TenantException){
             return ApiResponse.error(HttpStatus.HTTP_UNAUTHORIZED, "租户已到期，请联系管理员");
