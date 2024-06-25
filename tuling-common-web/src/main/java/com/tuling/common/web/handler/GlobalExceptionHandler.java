@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
                 message = "登录信息已失效，请重新登录";
             }
             else if(notLoginException.getType().equals(NotLoginException.TOKEN_TIMEOUT)) {
-                message = "长时间未操作，当前登录已退出，请重新登录";
+                message = "登录信息已失效，请重新登录";
             }
             else if(notLoginException.getType().equals(NotLoginException.BE_REPLACED)) {
                 message = "已在其他设备登录，当前会话已退出";
@@ -64,7 +64,7 @@ public class GlobalExceptionHandler {
                 message = "登录信息已失效";
             }
             else if(notLoginException.getType().equals(NotLoginException.TOKEN_FREEZE)) {
-                message = "登录信息已失效";
+                message = "长时间未操作，当前登录已退出，请重新登录";
             }
             else if(notLoginException.getType().equals(NotLoginException.NO_PREFIX)) {
                 message = "登录信息无效，请重新登录";
