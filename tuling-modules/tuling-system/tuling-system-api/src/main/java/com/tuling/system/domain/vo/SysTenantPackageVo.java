@@ -13,6 +13,6 @@ public class SysTenantPackageVo extends BaseVo {
   private String remark;
   private Boolean menuCheckStrictly;
   private Boolean status;
-
+  private  String code;
 
 }

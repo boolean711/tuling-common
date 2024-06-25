@@ -18,6 +18,7 @@ import com.tuling.system.domain.vo.SysRoleVo;
 import com.tuling.system.domain.vo.SysTenantVo;
 import com.tuling.system.mapper.SysRoleMapper;
 import com.tuling.system.service.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 
 
 @Service
+@Slf4j
 public class SysRoleServiceImpl extends CrudBaseServiceImpl<SysRole, SysRoleVo, SysRoleSaveDto, SysRoleMapper> implements SysRoleService {
 
 
@@ -88,7 +90,6 @@ public class SysRoleServiceImpl extends CrudBaseServiceImpl<SysRole, SysRoleVo, 
         if (!LoginHelper.isAdmin()){
             records.removeIf(item->permissionService.isGivenPermissionByRoleId(item.getId(), Collections.singletonList(PermissionConstants.TENANT_ADMIN)));
         }
-
         syncInfo(records);
     }
 
@@ -173,36 +174,40 @@ public class SysRoleServiceImpl extends CrudBaseServiceImpl<SysRole, SysRoleVo, 
     }
 
     private void syncInfo(List<SysRoleVo> records) {
-        Map<Long, SysPermissionVo> idVoMap = permissionService.getIdVoMap(null);
+        if (CollectionUtils.isNotEmpty(records)){
+            Map<Long, SysPermissionVo> idVoMap = permissionService.getIdVoMap(null);
 
 
-        List<Long> roleIdList = records.stream().map(SysRoleVo::getId).collect(Collectors.toList());
+            List<Long> roleIdList = records.stream().map(SysRoleVo::getId).collect(Collectors.toList());
+            log.info("roleIdList：{}",roleIdList);
 
-        Map<Long, Long> rolePermissionIdMap = rolePermissionRelService.getRolePermissionIdMap(roleIdList);
-
-
-        Map<Long, SysTenantVo> tenantVoMap = tenantService.getIdVoMap(null);
+            Map<Long, Long> rolePermissionIdMap = rolePermissionRelService.getRolePermissionIdMap(roleIdList);
 
 
-        for (SysRoleVo record : records) {
-            Long permissionId = rolePermissionIdMap.get(record.getId());
+            Map<Long, SysTenantVo> tenantVoMap = tenantService.getIdVoMap(null);
 
-            SysPermissionVo sysPermissionVo = idVoMap.get(permissionId);
 
-            if (sysPermissionVo != null) {
-                record.setPermissionName(sysPermissionVo.getPermissionName());
-                record.setPermissionId(permissionId);
-                record.setPermissionCode(sysPermissionVo.getPermissionCode());
+            for (SysRoleVo record : records) {
+                Long permissionId = rolePermissionIdMap.get(record.getId());
+
+                SysPermissionVo sysPermissionVo = idVoMap.get(permissionId);
+
+                if (sysPermissionVo != null) {
+                    record.setPermissionName(sysPermissionVo.getPermissionName());
+                    record.setPermissionId(permissionId);
+                    record.setPermissionCode(sysPermissionVo.getPermissionCode());
+                }
+                SysTenantVo tenantVo = tenantVoMap.get(record.getTenantId());
+
+
+
+                if (tenantVo!=null){
+                    record.setTenantName(tenantVo.getName());
+                }
+
+
             }
-            SysTenantVo tenantVo = tenantVoMap.get(record.getTenantId());
-
-
-
-            if (tenantVo!=null){
-                record.setTenantName(tenantVo.getName());
-            }
-
-
         }
+
     }
 }

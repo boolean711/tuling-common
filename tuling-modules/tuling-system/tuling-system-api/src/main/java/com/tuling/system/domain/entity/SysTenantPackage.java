@@ -18,4 +18,6 @@ public class SysTenantPackage extends BaseEntity {
   @TableField(exist = false)
   private Long tenantId;
 
+  private  String code;
+
 }
