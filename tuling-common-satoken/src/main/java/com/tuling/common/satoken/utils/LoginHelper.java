@@ -61,6 +61,7 @@ public class LoginHelper {
         session.updateTimeout(model.getTimeout());
         session.set(LOGIN_USER_SESSION_EXTRA_KEY, loginUser);
 
+
     }
 
     public static void storageSetLoginUser(LoginUserDetails loginUser) {

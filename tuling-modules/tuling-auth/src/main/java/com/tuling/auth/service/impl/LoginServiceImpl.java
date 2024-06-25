@@ -1,5 +1,6 @@
 package com.tuling.auth.service.impl;
 
+import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.crypto.digest.BCrypt;
@@ -10,6 +11,7 @@ import com.aliyun.captcha20230305.models.VerifyIntelligentCaptchaResponse;
 import com.aliyun.captcha20230305.models.VerifyIntelligentCaptchaResponseBody;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.tuling.auth.constants.DeviceConstants;
 import com.tuling.auth.constants.RedisKeyPrefixConstants;
 import com.tuling.auth.domain.dto.UpdatePasswordDto;
 import com.tuling.auth.domain.dto.UserLoginDto;
@@ -112,7 +114,7 @@ public class LoginServiceImpl implements LoginService {
             checkPassword(loginDto, incorrectLoginCountKey, userByUsername);
 
             if (checkTenantValid(loginUser, userByUsername)) {
-                String s = loginUserAndReturnToken(loginUser, userByUsername);
+                String s = loginUserAndReturnToken(loginUser, userByUsername, DeviceConstants.DEVICE_PC);
 
                 userLoginVo.setToken(s);
                 return userLoginVo;
@@ -167,7 +169,7 @@ public class LoginServiceImpl implements LoginService {
         setTenantVo(userByUsername);
         TlLoginUser loginUser = new TlLoginUser(userByUsername);
         if (checkTenantValid(loginUser, userByUsername)) {
-            String s = loginUserAndReturnToken(loginUser, userByUsername);
+            String s = loginUserAndReturnToken(loginUser, userByUsername,DeviceConstants.DEVICE_MOBILE);
 
             userLoginVo.setToken(s);
             return userLoginVo;
@@ -246,13 +248,13 @@ public class LoginServiceImpl implements LoginService {
         }
     }
 
-    private String loginUserAndReturnToken(LoginUserDetails loginUser, SysUserVo user) {
+    private String loginUserAndReturnToken(LoginUserDetails loginUser, SysUserVo user,String device) {
         ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attrs != null) {
             HttpServletRequest request = attrs.getRequest();
             user.setLastLoginIp(IpUtil.getClientIpAddr(request));
         }
-        LoginHelper.login(loginUser, null);
+        LoginHelper.login(loginUser, new SaLoginModel().setDevice(device));
         user.setLastLoginTime(new Date());
         userService.updateById(BeanUtil.toBean(user, SysUser.class));
         return StpUtil.getTokenInfo().tokenValue;
