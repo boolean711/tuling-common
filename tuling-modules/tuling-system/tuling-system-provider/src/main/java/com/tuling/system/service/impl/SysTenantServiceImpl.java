@@ -61,6 +61,14 @@ public class SysTenantServiceImpl
     private ApplicationEventPublisher eventPublisher;
 
     @Override
+    public void afterPageListByExpression(List<SysTenantVo> records) {
+        if (!LoginHelper.isAdmin()){
+            records.removeIf(item->!item.getId().equals(LoginHelper.getCurrentTenantId()));
+        }
+        super.afterPageListByExpression(records);
+    }
+
+    @Override
     public void beforeSave(SysTenantSaveDto dto) {
 
         if (dto.getId() == null) {
