@@ -142,7 +142,12 @@ public class AuthController {
         return ApiResponse.success(currentLoginUser.isInitialPassword());
 
     }
+    @GetMapping("/isAdmin")
+    public ApiResponse<Boolean> isAdmin() {
 
+        return ApiResponse.success(LoginHelper.isAdmin());
+
+    }
 
 
 }
