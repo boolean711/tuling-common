@@ -48,8 +48,8 @@
       <artifactId>spring-boot-starter-aop</artifactId>
       <exclusions>
         <exclusion>
-          <artifactId>spring-boot-starter</artifactId>
           <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter</artifactId>
         </exclusion>
       </exclusions>
     </dependency>

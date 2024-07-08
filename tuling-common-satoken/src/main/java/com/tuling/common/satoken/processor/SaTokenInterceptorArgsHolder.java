@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class SaTokenInterceptorArgsHolder {
@@ -20,16 +21,18 @@ public class SaTokenInterceptorArgsHolder {
 
     public void setMatchArgs(List<String> matchArgs) {
         if (CollectionUtil.isNotEmpty(matchArgs)) {
-            this.matchArgs.addAll(matchArgs);
-            this.matchArgs = this.matchArgs.stream().distinct().collect(Collectors.toList());
+            this.matchArgs = Stream.concat(this.matchArgs.stream(), matchArgs.stream())
+                    .distinct()
+                    .collect(Collectors.toList());
         }
 
     }
 
     public void setNotMatchAras(List<String> notMatchAras) {
         if (CollectionUtil.isNotEmpty(notMatchAras)) {
-            this.notMatchAras.addAll(notMatchAras);
-            this.notMatchAras = this.notMatchAras.stream().distinct().collect(Collectors.toList());
+            this.notMatchAras = Stream.concat(this.notMatchAras.stream(), notMatchAras.stream())
+                    .distinct()
+                    .collect(Collectors.toList());
         }
 
     }

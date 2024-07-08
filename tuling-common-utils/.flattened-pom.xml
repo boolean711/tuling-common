@@ -29,8 +29,8 @@
       <artifactId>hutool-all</artifactId>
       <exclusions>
         <exclusion>
-          <artifactId>hutool-jwt</artifactId>
           <groupId>cn.hutool</groupId>
+          <artifactId>hutool-jwt</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
