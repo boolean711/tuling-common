@@ -8,11 +8,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-/**
- * 门店审核事件处理
- *
- * @author <a href="https://github.com/binarywang">Binary Wang</a>
- */
 
 public  abstract class StoreCheckNotifyHandler extends AbstractHandler {
 

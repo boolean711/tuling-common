@@ -10,9 +10,7 @@ import java.util.Map;
 
 import static me.chanjar.weixin.common.api.WxConsts.EventType;
 
-/**
- * @author <a href="https://github.com/binarywang">Binary Wang</a>
- */
+
 
 public abstract class MenuHandler extends AbstractHandler {
 

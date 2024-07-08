@@ -9,9 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-/**
- * @author <a href="https://github.com/binarywang">Binary Wang</a>
- */
+
 
 public abstract class ScanHandler extends AbstractHandler {
 

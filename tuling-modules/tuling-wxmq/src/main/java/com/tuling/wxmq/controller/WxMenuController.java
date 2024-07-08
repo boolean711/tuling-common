@@ -22,9 +22,7 @@ import java.net.URL;
 
 import static me.chanjar.weixin.common.api.WxConsts.MenuButtonType;
 
-/**
- * @author <a href="https://github.com/binarywang">Binary Wang</a>
- */
+
 @AllArgsConstructor
 @RestController
 @RequestMapping("/wx/menu/{appid}")

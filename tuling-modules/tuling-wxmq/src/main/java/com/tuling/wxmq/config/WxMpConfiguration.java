@@ -25,11 +25,6 @@ import static me.chanjar.weixin.common.api.WxConsts.XmlMsgType.EVENT;
 import static me.chanjar.weixin.mp.constant.WxMpEventConstants.CustomerService.*;
 import static me.chanjar.weixin.mp.constant.WxMpEventConstants.POI_CHECK_NOTIFY;
 
-/**
- * wechat mp configuration
- *
- * @author <a href="https://github.com/binarywang">Binary Wang</a>
- */
 
 @Configuration
 @EnableConfigurationProperties(WxMpProperties.class)
