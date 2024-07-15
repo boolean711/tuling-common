@@ -23,7 +23,7 @@ public interface ISaTokenInterceptorArgs extends InitializingBean {
     @Override
     default void afterPropertiesSet() {
 
-        log.info("Initializing: " + this.getClass().getName());
+        log.info("Initializing: {}", this.getClass().getName());
 
     }
 }
