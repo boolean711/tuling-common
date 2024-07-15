@@ -10,6 +10,7 @@ import com.tuling.common.core.exception.ServiceException;
 import com.tuling.common.core.param.BaseEntity;
 import com.tuling.common.core.param.BaseTreeVo;
 
+import com.tuling.common.core.properties.TenantProperties;
 import com.tuling.common.mybatis.param.ExpressionQueryDto;
 import com.tuling.common.satoken.utils.LoginHelper;
 import com.tuling.common.utils.BeanListUtils;
@@ -43,6 +44,9 @@ public class SysMenuServiceImpl extends CrudBaseServiceImpl<SysMenu, SysMenuVo, 
 
     @Autowired
     private SysTenantPackageService tenantPackageService;
+
+    @Autowired
+    private TenantProperties tenantProperties;
 
 
     @Autowired
@@ -101,7 +105,7 @@ public class SysMenuServiceImpl extends CrudBaseServiceImpl<SysMenu, SysMenuVo, 
 
         IPage<SysMenuVo> voiPage = this.pageListByExpression(queryDto);
         List<SysMenuVo> records = voiPage.getRecords();
-        if (!LoginHelper.isAdmin()) {
+        if (!LoginHelper.isAdmin() && tenantProperties.isEnable()) {
             //TODO如果是普通用户，返回租户套餐中的菜单
             Long currentTenantId = LoginHelper.getCurrentTenantId();
             SysTenant tenant = tenantService.getById(currentTenantId);
